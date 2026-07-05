@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#0a2a52"/>
+  <rect x="48" y="72" width="416" height="368" rx="20" fill="#2f7bf5" opacity=".12"/>
+  <rect x="80" y="104" width="352" height="304" rx="14" fill="none" stroke="#cfae5e" stroke-width="4"/>
+  <text x="256" y="216" font-family="Georgia,serif" font-size="64" fill="#fff" text-anchor="middle" font-weight="700">PE</text>
+  <text x="256" y="276" font-family="monospace" font-size="34" fill="#a0b4c8" text-anchor="middle">BLUEPRINT</text>
+  <line x1="140" y1="330" x2="372" y2="330" stroke="#cfae5e" stroke-width="3" stroke-dasharray="8 6"/>
+  <text x="256" y="360" font-family="monospace" font-size="22" fill="#6ba3f5" text-anchor="middle">TEAM ALUM</text>
+</svg>
