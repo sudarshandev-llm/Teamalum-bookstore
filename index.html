@@ -771,6 +771,9 @@ h2.chap-title{font-size:clamp(24px,3vw,34px);margin:0 0 14px;}
   <button class="bubble-btn" id="redeemBtn" title="Redeem" onclick="goTo(7)">
     <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7zm0 3.3l6.2 3.1-6.2 3.1-6.2-3.1zm-8 5.6l8 4 8-4v2.1l-8 4-8-4z"/></svg>
   </button>
+  <button class="bubble-btn" id="userBtn" title="Sign in" onclick="handleAuthClick()">
+    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+  </button>
   <span class="bubble-label" id="pageLabel">HOME</span>
 </div>
 
@@ -1199,5 +1202,52 @@ updateDots();
   </div>
 </div>
 
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://placeholder.supabase.co';
+const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'placeholder-key';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = JSON.parse(localStorage.getItem('sb-user') || 'null');
+const userBtn = document.getElementById('userBtn');
+
+function updateUserUI() {
+  if (currentUser) {
+    userBtn.innerHTML = `<span style="font-size:10px;font-weight:600;color:#fff;">${currentUser.email?.[0].toUpperCase() || 'U'}</span>`;
+    userBtn.title = currentUser.email || 'Signed in';
+  } else {
+    userBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+    userBtn.title = 'Sign in';
+  }
+}
+
+window.handleAuthClick = async function() {
+  if (currentUser) {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      currentUser = null;
+      localStorage.removeItem('sb-user');
+      updateUserUI();
+    }
+    return;
+  }
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + '/auth/callback.html' }
+  });
+  if (error) console.error('Auth error:', error.message);
+};
+
+// Restore session on load
+(async () => {
+  const { data } = await supabase.auth.getSession();
+  if (data?.session) {
+    currentUser = data.session.user;
+    localStorage.setItem('sb-user', JSON.stringify(currentUser));
+  }
+  updateUserUI();
+})();
+</script>
 </body>
 </html>

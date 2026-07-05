@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Completing sign in — Team Alum</title>
+<style>
+  body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0a2a52;color:#fff;font-family:system-ui,sans-serif;}
+  .spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .box{text-align:center;}
+  p{margin-top:16px;font-size:14px;opacity:.7;}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="spinner"></div>
+  <p>Completing sign in...</p>
+</div>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://placeholder.supabase.co';
+const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'placeholder-key';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function handleCallback() {
+  const hash = window.location.hash;
+  const params = new URLSearchParams(hash.replace('#', ''));
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+
+  if (accessToken) {
+    const { data, error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken || '',
+    });
+    if (!error && data.session) {
+      localStorage.setItem('sb-user', JSON.stringify(data.session.user));
+    }
+  } else {
+    const { data, error } = await supabase.auth.getSession();
+    if (!error && data.session) {
+      localStorage.setItem('sb-user', JSON.stringify(data.session.user));
+    }
+  }
+
+  window.location.href = '/';
+}
+
+handleCallback();
+</script>
+</body>
+</html>
