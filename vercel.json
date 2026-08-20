@@ -1,6 +1,8 @@
 {
-  "outputDirectory": ".",
   "framework": null,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "installCommand": "",
   "routes": [
     {
       "src": "/auth/callback(.*)",
