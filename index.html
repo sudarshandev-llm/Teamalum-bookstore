@@ -172,6 +172,17 @@ h2.chap-title{font-size:clamp(24px,3vw,34px);margin:0 0 14px;}
 .redeem-result.success{display:block;background:rgba(92,184,92,.1);border:1px solid var(--success);}
 .redeem-result.error{display:block;background:rgba(240,173,78,.1);border:1px solid var(--warning);}
 
+/* WEB-ONLY ACCESS PROTECTION (no download / screenshot deterrents) */
+.content-scroll,.sheet-inner,.preview-render,#previewRendered{
+  -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+}
+.content-scroll img,.sheet-inner img,.preview-render img,#previewRendered img{
+  -webkit-user-drag:none;-moz-user-drag:none;user-drag:none;pointer-events:none;
+}
+@media print{
+  .content-scroll,.sheet-inner,.preview-render,#previewRendered{visibility:hidden;overflow:hidden;max-height:0;min-height:0;}
+}
+
 /* PURCHASE FLOW INFO */
 .purchase-info{text-align:center;margin:16px 0;padding:16px;border-radius:12px;background:rgba(47,123,245,.05);border:1px dashed rgba(47,123,245,.2);font-size:13px;color:var(--ink-soft);line-height:1.6;}
 .purchase-info strong{color:var(--blue-deep);font-family:'IBM Plex Mono',monospace;}
@@ -1421,9 +1432,14 @@ function redeemCode(){
     result.textContent = 'Invalid code format. Expected format: TA-PE-XX-XXXXXX';
     return;
   }
-  result.className = 'redeem-result success';
-  result.textContent = '✅ License code accepted! Redirecting to unlock your book...';
-  setTimeout(() => { goTo(3); }, 1500);
+  result.className = 'redeem-result';
+  result.textContent = '⏳ Verifying license code...';
+  if(typeof window.redeemLicense === 'function'){
+    window.redeemLicense(code, result);
+  }else{
+    result.className = 'redeem-result error';
+    result.textContent = 'Redeem service still loading. Please try again.';
+  }
 }
 
 /* --- FAQ Toggle --- */
@@ -1568,6 +1584,94 @@ window.goTo = function(n) {
   origGoTo(n);
   if (n === 13) loadProfilePage();
 };
+
+/* --- Real License Redemption (web-only access) --- */
+const PLAN_DAYS = { '1M': 30, '3M': 90, 'LT': null };
+
+window.redeemLicense = async function(code, resultEl) {
+  if (!currentUser) {
+    resultEl.className = 'redeem-result error';
+    resultEl.textContent = 'Please sign in with Google first, then redeem your code.';
+    window.handleAuthClick();
+    return;
+  }
+
+  try {
+    // 1. Look up the code
+    const { data: codeRows, error: codeErr } = await supabase
+      .from('redeem_codes')
+      .select('*')
+      .ilike('code', code)
+      .limit(1);
+    if (codeErr) throw codeErr;
+
+    const rec = codeRows && codeRows[0];
+    if (!rec) {
+      resultEl.className = 'redeem-result error';
+      resultEl.textContent = '❌ Invalid license code. Please check and try again.';
+      return;
+    }
+    if (rec.status !== 'available') {
+      resultEl.className = 'redeem-result error';
+      resultEl.textContent = '❌ This code has already been ' + rec.status + '.';
+      return;
+    }
+    if (rec.expires_at && new Date(rec.expires_at) <= Date.now()) {
+      resultEl.className = 'redeem-result error';
+      resultEl.textContent = '❌ This code has expired. Please contact support.';
+      return;
+    }
+
+    // 2. Compute license expiry from plan
+    const days = PLAN_DAYS[rec.plan];
+    const now = new Date();
+    const expiresAt = days ? new Date(now.getTime() + days * 86400000).toISOString() : null;
+
+    // 3. Mark code used + create license (small transaction via sequential calls)
+    const { error: useErr } = await supabase
+      .from('redeem_codes')
+      .update({ status: 'used', used_by: currentUser.id, used_at: now.toISOString(), updated_at: now.toISOString() })
+      .eq('id', rec.id)
+      .eq('status', 'available');
+    if (useErr) throw useErr;
+
+    const { error: licErr } = await supabase
+      .from('licenses')
+      .insert({
+        user_id: currentUser.id,
+        code: rec.code,
+        plan: rec.plan,
+        status: 'active',
+        purchased_at: now.toISOString(),
+        activated_at: now.toISOString(),
+        expires_at: expiresAt,
+        metadata: { source: 'redeem' }
+      });
+    if (licErr) throw licErr;
+
+    // 4. Grant web-only reading access (no download)
+    const grant = { code: rec.code, plan: rec.plan, activated_at: now.toISOString(), expires_at: expiresAt };
+    localStorage.setItem('sb-grant', JSON.stringify(grant));
+
+    resultEl.className = 'redeem-result success';
+    resultEl.textContent = '✅ ' + (rec.plan === 'LT' ? 'Lifetime' : rec.plan === '1M' ? '1 Month' : '3 Months') + ' access unlocked! Opening your book...';
+    setTimeout(() => { goTo(3); }, 1500);
+  } catch (e) {
+    console.error('Redeem error:', e);
+    resultEl.className = 'redeem-result error';
+    resultEl.textContent = '⚠️ Could not redeem code. Please contact support.';
+  }
+};
+
+/* --- Web-only protection: block download, print, right-click, screenshots --- */
+window.addEventListener('contextmenu', (e) => {
+  if (document.querySelector('.content-scroll, .preview-render, #previewRendered')) e.preventDefault();
+});
+document.addEventListener('keydown', (e) => {
+  const isPrint = (e.ctrlKey && (e.key === 'p' || e.key === 'P'));
+  const isSave = (e.ctrlKey && (e.key === 's' || e.key === 'S'));
+  if (isPrint || isSave) e.preventDefault();
+});
 </script>
 </body>
 </html>
