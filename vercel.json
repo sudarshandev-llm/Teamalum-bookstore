@@ -9,6 +9,14 @@
       "dest": "/auth/callback.html"
     },
     {
+      "src": "/admin\\.team(.*)",
+      "dest": "/admin.html"
+    },
+    {
+      "src": "/admin(.*)",
+      "dest": "/admin.html"
+    },
+    {
       "handle": "filesystem"
     },
     {

@@ -17,6 +17,11 @@ http.createServer((req, res) => {
     filePath = './auth/callback.html';
   }
   
+  // Special case for admin panel
+  if (filePath === './admin.team' || filePath === './admin.team/' || filePath === './admin') {
+    filePath = './admin.html';
+  }
+  
   fs.readFile(filePath, (err, content) => {
     if (err) {
       if (err.code === 'ENOENT') {
