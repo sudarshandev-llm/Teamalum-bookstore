@@ -208,7 +208,7 @@ textarea.form-input{resize:vertical;min-height:80px}
     <div class="sub">Restricted access. Sign in with Google to continue.</div>
     <button class="btn-primary" id="googleBtn" onclick="login()">Continue with Google</button>
     <div class="msg" id="loginMsg"></div>
-    <div class="note">Only accounts with the <b>admin</b> or <b>super_admin</b> role can access this panel. Non-admin accounts will be blocked.</div>
+    <div class="note">Access is restricted to the authorized administrator email only. Only <b>teamalumorg@gmail.com</b> can sign in. Others will be blocked automatically.</div>
   </div>
 </div>
 
@@ -450,7 +450,14 @@ async function restoreSession(){
   return null;
 }
 
+const ALLOWED_ADMIN_EMAILS = ['teamalumorg@gmail.com'];
+
 async function checkAccess(user, profile){
+  const email = (user.email || '').trim().toLowerCase();
+  if(!ALLOWED_ADMIN_EMAILS.includes(email)){
+    await supabase.auth.signOut();
+    return false;
+  }
   const role = profile?.role || 'user';
   if(!['admin','super_admin'].includes(role)){
     await supabase.auth.signOut();
@@ -785,7 +792,7 @@ window.closeModal = function(){ document.getElementById('modalBg').classList.rem
   const session = await restoreSession();
   if(!session){ updateLoginUI(); return; }
   if(!await checkAccess(session.user, session.profile)){
-    hideShell('Access denied: your account does not have admin privileges.');
+    hideShell('Access denied: only the authorized administrator email (teamalumorg@gmail.com) can access this panel.');
     return;
   }
   showShell(session.user, session.profile);
