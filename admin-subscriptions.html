@@ -21,7 +21,6 @@ input,select,textarea{font-family:'Inter',sans-serif;}
 .auth-card{max-width:420px;width:100%;background:var(--paper);border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);padding:48px 36px;text-align:center;border:1px solid rgba(10,42,82,.06);}
 .auth-card h2{margin-bottom:8px;}
 .auth-card p{color:var(--ink-soft);font-size:15px;margin-bottom:28px;}
-.auth-card .denied{color:var(--danger);font-size:14px;margin-top:14px;display:none;}
 .google-btn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e0e6ed;border-radius:999px;padding:14px 28px;font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);box-shadow:0 2px 8px rgba(10,42,82,.1);transition:all .2s;}
 .google-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(10,42,82,.16);}
 .google-btn:disabled{opacity:.5;transform:none;cursor:default;}
@@ -158,7 +157,6 @@ tr:hover td{background:#fafcff;}
     <h2>Bookstore Admin</h2>
     <p>Sign in to manage subscriptions and licenses.</p>
     <button class="google-btn" id="google-login-btn"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.2 6.2 29.4 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.2 6.2 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.6-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>Sign in with Google</button>
-    <p class="denied" id="denied-msg">Access denied. Redirecting...</p>
   </div>
 </div>
 
@@ -299,6 +297,9 @@ tr:hover td{background:#fafcff;}
           <option value="Lifetime">Lifetime</option>
           <option value="Custom">Custom</option>
         </select>
+        <input type="date" class="tool-select" id="date-from" title="Issued from">
+        <input type="date" class="tool-select" id="date-to" title="Issued until">
+        <button class="btn btn-sm" id="clear-dates" title="Clear date range">Clear dates</button>
       </div>
 
       <div class="table-scroll">
@@ -377,11 +378,10 @@ async function checkSession() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) { authScreen.style.display = 'flex'; dashboard.style.display = 'none'; return; }
   if (user.email !== ADMIN_EMAIL) {
+    // Not the authorized admin: silently return to the public bookstore
+    // homepage. No "access denied" reveal that an admin panel exists.
     await supabase.auth.signOut();
-    authScreen.style.display = 'flex';
-    document.getElementById('denied-msg').style.display = 'block';
-    googleLoginBtn.disabled = true;
-    setTimeout(() => { window.location.replace('/'); }, 1800);
+    window.location.replace('/');
     return;
   }
   authScreen.style.display = 'none';
@@ -454,9 +454,19 @@ function getFiltered() {
   const q = document.getElementById('search-input').value.trim().toLowerCase();
   const status = document.getElementById('status-filter').value;
   const plan = document.getElementById('plan-filter').value;
+  const from = document.getElementById('date-from').value; // yyyy-mm-dd
+  const to = document.getElementById('date-to').value;     // yyyy-mm-dd
+  const fromMs = from ? new Date(from + 'T00:00:00').getTime() : null;
+  const toMs = to ? new Date(to + 'T23:59:59').getTime() : null;
   return ALL.filter(r => {
     if (status && r.status !== status) return false;
     if (plan && r.plan !== plan) return false;
+    if (fromMs || toMs) {
+      const issued = r.date_issued ? new Date(r.date_issued).getTime() : null;
+      if (!issued) return false;
+      if (fromMs && issued < fromMs) return false;
+      if (toMs && issued > toMs) return false;
+    }
     if (q) {
       const hay = [r.code, r.buyer_name, r.buyer_phone, r.buyer_email].filter(Boolean).join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
@@ -712,6 +722,14 @@ document.querySelectorAll('#admin-tabs .tab').forEach(tab => {
   document.getElementById('search-input').addEventListener(evt, () => { currentPage = 0; renderTable(); });
   document.getElementById('status-filter').addEventListener(evt, () => { currentPage = 0; renderTable(); });
   document.getElementById('plan-filter').addEventListener(evt, () => { currentPage = 0; renderTable(); });
+  document.getElementById('date-from').addEventListener(evt, () => { currentPage = 0; renderTable(); });
+  document.getElementById('date-to').addEventListener(evt, () => { currentPage = 0; renderTable(); });
+});
+document.getElementById('clear-dates').addEventListener('click', () => {
+  document.getElementById('date-from').value = '';
+  document.getElementById('date-to').value = '';
+  currentPage = 0;
+  renderTable();
 });
 document.getElementById('prev-page').addEventListener('click', () => { currentPage--; renderTable(); });
 document.getElementById('next-page').addEventListener('click', () => { currentPage++; renderTable(); });
