@@ -3,33 +3,30 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "installCommand": "",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/auth/callback(.*)",
-      "dest": "/auth/callback.html"
+      "source": "/auth/callback(.*)",
+      "destination": "/auth/callback.html"
     },
     {
-      "src": "/admin$",
-      "dest": "/admin-subscriptions.html"
+      "source": "/admin",
+      "destination": "/admin-subscriptions.html"
     },
     {
-      "src": "/admin\\.team\\.html(.*)",
-      "dest": "/admin.html"
+      "source": "/admin.team.html(.*)",
+      "destination": "/admin.html"
     },
     {
-      "src": "/admin\\.team(.*)",
-      "dest": "/admin.html"
+      "source": "/admin.team(.*)",
+      "destination": "/admin.html"
     },
     {
-      "src": "/admin(.*)",
-      "dest": "/admin.html"
+      "source": "/admin(.*)",
+      "destination": "/admin.html"
     },
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
