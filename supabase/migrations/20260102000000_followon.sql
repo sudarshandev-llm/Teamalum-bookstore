@@ -1,0 +1,4 @@
+-- Follow-on schema for the Team Alum Bookstore.
+-- Already applied to the remote project; kept as a no-op stub so that the
+-- migration history in this standalone repo matches the live database.
+-- The authoritative schema lives in supabase/schema.sql.

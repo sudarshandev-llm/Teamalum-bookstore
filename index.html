@@ -114,6 +114,8 @@ h2.chap-title{font-size:clamp(24px,3vw,34px);margin:0 0 14px;}
 .hero-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:60px;padding:0 40px;}
 .hero-copy{max-width:420px;}
 .brand-badge{display:inline-flex;align-items:center;gap:10px;background:#ffffff;border:1px solid rgba(207,174,94,.5);color:#a3822f;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;padding:8px 14px;border-radius:999px;margin-bottom:22px;box-shadow:var(--shadow-soft);}
+.back-link{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--blue-bright);text-decoration:none;margin-bottom:18px;padding:6px 12px;border:1px dashed var(--blue-hair);border-radius:999px;transition:all .2s;}
+.back-link:hover{background:var(--light-blue);border-color:var(--blue-bright);}
 .hero-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(32px,4.4vw,52px);color:var(--blue-deep);line-height:1.1;margin:0 0 16px;}
 .hero-title em{color:var(--blue-bright);font-style:italic;}
 .hero-sub{color:var(--ink-soft);font-size:15px;line-height:1.7;margin:0 0 28px;}
@@ -425,6 +427,7 @@ body,#stage,input,button,textarea{-webkit-tap-highlight-color:transparent;touch-
     <div class="hero-wrap">
       <div class="hero-copy">
         <div class="brand-badge">📚 TEAM ALUM PUBLISHING</div>
+        <a class="back-link" href="https://team-alum.vercel.app" target="_blank" rel="noopener">← Back to Team Alum</a>
         <h1 class="hero-title reveal-heading" data-anim>The Definitive Guide to <em>Prompt Engineering</em>.</h1>
         <p class="hero-sub">From first principles to production workflows — master the art and science of human-AI communication. 26 chapters, 1000+ examples, and a complete professional toolkit.</p>
         <div class="hero-cta">
@@ -1034,7 +1037,7 @@ body,#stage,input,button,textarea{-webkit-tap-highlight-color:transparent;touch-
   <span class="bubble-label" id="pageLabel">HOME</span>
 </div>
 
-<div class="watermark"><span class="mono">S</span> Sudarshan Hadmode — Founder, Team Alum</div>
+<div class="watermark"><span class="mono">S</span> Sudarshan Hadmode — Founder, Team Alum · <a href="/admin" style="color:var(--ink-soft);opacity:.55;text-decoration:none;font-family:'IBM Plex Mono',monospace;font-size:10px;" aria-label="Administration">Admin</a></div>
 <div class="watermark-page" id="pageCounter">01 / 10</div>
 
 <!-- PREVIEW CONTENT (safely embedded as text/plain - never rendered directly, only through JS) -->
@@ -1401,11 +1404,20 @@ function confirmWhatsApp(){
   const msg = encodeURIComponent(
     `Hi Team Alum! I'd like to purchase the "${plan}" plan (${duration}) for ₹${price} for the Prompt Engineering Blueprint. Please share payment details. My email: socialsudarshan8@gmail.com`
   );
-  window.open(`https://wa.me/917775990933?text=${msg}`, '_blank');
+window.open(`https://wa.me/917775990933?text=${msg}`, '_blank');
   closePurchaseModal();
+  // Record purchase request (code stays NULL until admin issues it after payment verification)
+  (async () => {
+    try {
+      const sb = window._supabase;
+      if (!sb) return;
+      await sb.rpc('request_purchase', { p_plan: plan, p_amount: Number(price) });
+    } catch (e) { /* non-critical — WhatsApp flow is the source of truth */ }
+  })();
 }
 
 /* --- Redeem License --- */
+let redeemInFlight = false;
 function redeemCode(){
   const input = document.getElementById('redeem-input');
   const result = document.getElementById('redeem-result');
@@ -1421,9 +1433,47 @@ function redeemCode(){
     result.textContent = 'Invalid code format. Expected format: TA-PE-XX-XXXXXX';
     return;
   }
-  result.className = 'redeem-result success';
-  result.textContent = '✅ License code accepted! Redirecting to unlock your book...';
-  setTimeout(() => { goTo(3); }, 1500);
+  if(redeemInFlight) return;
+  redeemInFlight = true;
+  result.className = 'redeem-result error';
+  result.textContent = 'Checking license...';
+  (async () => {
+    try {
+      const sb = window._supabase;
+      if (!sb) throw new Error('offline');
+      let deviceId = localStorage.getItem('ta-pe-device-id');
+      if (!deviceId) {
+        deviceId = (crypto.randomUUID ? crypto.randomUUID() : 'd-' + Math.random().toString(36).slice(2));
+        localStorage.setItem('ta-pe-device-id', deviceId);
+      }
+      const label = `${navigator.platform || ''} ${navigator.userAgent?.match(/Chrome\/[\d.]+|Firefox\/[\d.]+|Safari\/[\d.]+/)?.[0] || ''}`.trim();
+      const { data, error } = await sb.rpc('validate_code', {
+        p_code: code,
+        p_device_id: deviceId,
+        p_device_label: label
+      });
+      if (error) throw error;
+      if (data && data.valid) {
+        result.className = 'redeem-result success';
+        result.textContent = '✅ License verified! Unlocking your book...';
+        localStorage.setItem('ta-pe-license', JSON.stringify({ code, plan: data.plan, expires_at: data.expires_at }));
+        setTimeout(() => { goTo(3); }, 1200);
+      } else {
+        result.className = 'redeem-result error';
+        const reason = data?.reason;
+        if (reason === 'expired') result.textContent = '❌ This license has expired. Please renew via WhatsApp.';
+        else if (reason === 'revoked') result.textContent = '❌ This license has been revoked. Contact support.';
+        else if (reason === 'device_limit') result.textContent = '❌ Device limit reached (3 devices). Contact support to reset.';
+        else if (reason === 'not_found') result.textContent = '❌ License code not found. Check the code or contact support.';
+        else result.textContent = '❌ License code is not active. Contact support.';
+      }
+    } catch (e) {
+      result.className = 'redeem-result error';
+      result.textContent = '❌ Could not verify license. Check your connection and try again.';
+    } finally {
+      redeemInFlight = false;
+    }
+  })();
 }
 
 /* --- FAQ Toggle --- */
@@ -1480,6 +1530,7 @@ const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://gvkcwtoryr
 const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2a2N3dG9yeXJ6Z2J0dWZzZ2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTAxODYsImV4cCI6MjA5ODgyNjE4Nn0.LuHf8rs8LXgqGY8Av4AkSlMtN3m2gcMaMwrH2h4tnfE';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+window._supabase = supabase;
 let currentUser = JSON.parse(localStorage.getItem('sb-user') || 'null');
 const userBtn = document.getElementById('userBtn');
 
