@@ -4,8 +4,8 @@
 -- ============================================================
 
 -- 0. EXTENSIONS
-create extension if not exists "pg_crypto" with schema "extensions";
-create extension if not exists "pg_net" with schema "extensions";
+create extension if not exists "pgcrypto" with schema "extensions";
+create extension if not exists "pg_net";
 
 -- 1. ENUMS
 create type user_role as enum ('user', 'admin', 'super_admin');
@@ -420,13 +420,19 @@ returns trigger
 language plpgsql
 security definer set search_path = ''
 as $$
+declare
+  new_role public.user_role := 'user';
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
+  if new.email = 'teamalumorg@gmail.com' then
+    new_role := 'admin';
+  end if;
+  insert into public.profiles (id, email, full_name, avatar_url, role)
   values (
     new.id,
     new.email,
     new.raw_user_meta_data ->> 'full_name',
-    new.raw_user_meta_data ->> 'avatar_url'
+    new.raw_user_meta_data ->> 'avatar_url',
+    new_role
   );
   return new;
 end;

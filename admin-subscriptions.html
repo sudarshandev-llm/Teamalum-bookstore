@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Bookstore Admin — Team Alum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Lora:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#fff;--paper-2:#eaf4ff;--ink:#132339;--ink-soft:#3c5978;--blue-deep:#0a2a52;--blue-bright:#2f7bf5;--blue-glass:#bcd8ff;--gold:#cfae5e;--light-blue:#eaf4ff;--shadow-soft:0 10px 24px -10px rgba(10,42,82,.18);--success:#5cb85c;--warning:#f0ad4e;--danger:#d9534f;--radius:14px;--radius-lg:20px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Lora',serif;color:var(--ink);background:var(--paper-2);-webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:'Playfair Display',serif;color:var(--blue-deep);line-height:1.2;}
+button{font-family:'Inter',sans-serif;cursor:pointer;}
+input,select,textarea{font-family:'Inter',sans-serif;}
+
+/* Auth */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.auth-card{max-width:420px;width:100%;background:var(--paper);border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);padding:48px 36px;text-align:center;border:1px solid rgba(10,42,82,.06);}
+.auth-card h2{margin-bottom:8px;}
+.auth-card p{color:var(--ink-soft);font-size:15px;margin-bottom:28px;}
+.auth-card .denied{color:var(--danger);font-size:14px;margin-top:14px;display:none;}
+.google-btn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e0e6ed;border-radius:999px;padding:14px 28px;font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);box-shadow:0 2px 8px rgba(10,42,82,.1);transition:all .2s;}
+.google-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(10,42,82,.16);}
+.google-btn:disabled{opacity:.5;transform:none;cursor:default;}
+.google-btn svg{width:20px;height:20px;}
+
+/* Layout */
+.topbar{background:var(--paper);border-bottom:1px solid rgba(10,42,82,.08);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand .logo{width:36px;height:36px;border-radius:10px;background:var(--blue-deep);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:15px;}
+.brand .t1{font-family:'Playfair Display',serif;font-weight:700;color:var(--blue-deep);font-size:16px;}
+.brand .t2{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-soft);}
+.top-right{display:flex;align-items:center;gap:14px;}
+.admin-email{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+.btn{font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:7px;border-radius:10px;padding:9px 18px;font-weight:600;font-size:13px;border:1.5px solid #e0e6ed;background:#fff;color:var(--ink);transition:all .18s;}
+.btn:hover{box-shadow:0 4px 12px rgba(10,42,82,.12);transform:translateY(-1px);}
+.btn-primary{background:var(--blue-bright);border-color:var(--blue-bright);color:#fff;}
+.btn-primary:hover{background:#1e63d0;}
+.btn-sm{padding:6px 13px;font-size:12px;border-radius:8px;}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--blue-bright);box-shadow:none;}
+.btn-ghost:hover{background:var(--light-blue);transform:none;box-shadow:none;}
+.btn-danger{background:#fff;border-color:#f2c5c2;color:var(--danger);}
+.btn-danger:hover{background:#fdefee;}
+
+/* Main content */
+.wrap{max-width:1200px;margin:0 auto;padding:28px 28px 80px;}
+
+/* Tabs */
+.tabs{display:inline-flex;gap:4px;background:var(--paper);border:1px solid rgba(10,42,82,.08);padding:6px;border-radius:12px;margin-bottom:24px;}
+.tab{border:none;background:transparent;padding:10px 20px;border-radius:8px;font-weight:600;font-size:14px;color:var(--ink-soft);transition:all .18s;}
+.tab:hover{color:var(--ink);}
+.tab.active{background:var(--blue-deep);color:#fff;}
+
+.section{display:none;}
+.section.active{display:block;}
+.sect-head{margin-bottom:20px;}
+.sect-head h2{margin-bottom:4px;}
+.sect-head .sub{color:var(--ink-soft);font-size:14px;}
+
+/* Stat cards */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--paper);border:1px solid rgba(10,42,82,.06);border-radius:var(--radius-lg);padding:20px 22px;box-shadow:var(--shadow-soft);}
+.stat-card .lbl{font-family:'Inter',sans-serif;font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);}
+.stat-card .val{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--blue-deep);margin-top:6px;}
+.stat-card .hint{font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-soft);margin-top:3px;}
+.stat-card.accent .val{color:var(--blue-bright);}
+.stat-card.green .val{color:var(--success);}
+.stat-card.red .val{color:var(--danger);}
+.stat-card.amber .val{color:var(--warning);}
+
+/* Card */
+.card{background:var(--paper);border:1px solid rgba(10,42,82,.06);border-radius:var(--radius-lg);padding:22px 24px;box-shadow:var(--shadow-soft);margin-bottom:22px;}
+.card h3{font-size:18px;margin-bottom:12px;}
+.card .sub{font-size:13px;color:var(--ink-soft);margin-bottom:14px;}
+
+/* Chart */
+.chart-box svg{width:100%;height:auto;display:block;}
+.chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);}
+.chart-legend span{display:inline-flex;align-items:center;gap:6px;}
+.chart-dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+.range-tabs{display:inline-flex;background:var(--paper-2);border:1px solid rgba(10,42,82,.08);border-radius:10px;padding:3px;}
+.range-tab{border:none;background:transparent;padding:7px 14px;border-radius:8px;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;color:var(--ink-soft);}
+.range-tab.active{background:var(--blue-deep);color:#fff;}
+
+/* Form */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;}
+.field label{display:block;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+.field select,.field input{width:100%;padding:10px 13px;border:1.5px solid #e0e6ed;border-radius:10px;font-size:14px;background:#fff;color:var(--ink);}
+.field select:focus,.field input:focus{outline:none;border-color:var(--blue-bright);}
+.field .hint{font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-soft);margin-top:5px;}
+#customDateField{display:none;}
+#customDateField.show{display:block;}
+
+.gen-result{margin-top:16px;display:none;}
+.gen-result.show{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#eef7f0;border:1px solid #cfe8d5;border-radius:12px;padding:14px 18px;}
+.gen-code{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;letter-spacing:2px;color:var(--success);}
+.gen-meta{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);flex:1;}
+
+/* Table */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.search{flex:1;min-width:220px;}
+.search input{width:100%;padding:11px 14px;border:1.5px solid #e0e6ed;border-radius:12px;font-size:14px;}
+.search input:focus{outline:none;border-color:var(--blue-bright);}
+.tool-select{padding:10px 13px;border:1.5px solid #e0e6ed;border-radius:12px;font-size:13px;background:#fff;color:var(--ink);}
+.table-scroll{overflow-x:auto;border:1px solid rgba(10,42,82,.06);border-radius:14px;background:#fff;}
+table{width:100%;border-collapse:collapse;font-family:'Inter',sans-serif;font-size:13px;min-width:900px;}
+th{background:var(--paper-2);text-align:left;padding:12px 14px;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid #e0e6ed;white-space:nowrap;}
+td{padding:12px 14px;border-bottom:1px solid #f1f4f9;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafcff;}
+.t-code{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--blue-deep);letter-spacing:.5px;}
+.pill{display:inline-block;padding:3px 11px;border-radius:999px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;}
+.pill.active{background:#e7f6ec;color:#1e7a41;}
+.pill.expired{background:#fdeeec;color:#c0392b;}
+.pill.revoked{background:#f5ecf8;color:#8e44ad;}
+.pill.pending{background:#fdf3e3;color:#b9770e;}
+.pill.yes{background:#e7f6ec;color:#1e7a41;}
+.pill.no{background:#f4f6f9;color:var(--ink-soft);}
+.row-actions{display:flex;gap:6px;}
+.empty{text-align:center;padding:44px 20px;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:14px;}
+.pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:16px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);}
+.pager button{border:1.5px solid #e0e6ed;background:#fff;border-radius:8px;padding:6px 14px;font-weight:600;}
+.pager button:disabled{opacity:.4;cursor:default;}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,42,82,.5);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:4vh 16px;z-index:100;overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--paper);border-radius:var(--radius-lg);max-width:560px;width:100%;padding:30px 32px;box-shadow:0 20px 60px rgba(10,42,82,.25);position:relative;}
+.modal-box h3{margin-bottom:16px;}
+.modal-close{position:absolute;top:16px;right:16px;border:none;background:#f1f4f9;width:32px;height:32px;border-radius:50%;font-size:16px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:#e4e8ed;}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--paper-2);border:1px solid #e0e6ed;border-radius:10px;padding:10px 14px;margin-top:12px;}
+.toggle-row .lbl{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--blue-deep);color:#fff;padding:12px 24px;border-radius:999px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;opacity:0;transition:.3s;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.2);pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+@media(max-width:720px){
+  .wrap{padding:18px 14px 60px;}
+  .topbar{padding:12px 14px;}
+  .admin-email{display:none;}
+  .edit-grid{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- Auth screen -->
+<div class="auth-wrap" id="auth-screen" style="display:none;">
+  <div class="auth-card">
+    <h2>Bookstore Admin</h2>
+    <p>Sign in to manage subscriptions and licenses.</p>
+    <button class="google-btn" id="google-login-btn"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.2 6.2 29.4 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.2 6.2 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.6-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>Sign in with Google</button>
+    <p class="denied" id="denied-msg">Access denied. Redirecting...</p>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" style="display:none;">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">TA</div>
+      <div>
+        <div class="t1">Bookstore Admin</div>
+        <div class="t2">Prompt Engineering Blueprint</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <span class="admin-email" id="admin-email"></span>
+      <a class="btn btn-ghost" href="/" target="_blank" rel="noopener">Open Storefront</a>
+      <button class="btn" id="signout-btn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="tabs" id="admin-tabs">
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="generate">Generate Code</button>
+      <button class="tab" data-tab="subscriptions">Subscriptions</button>
+    </div>
+
+    <!-- ======== DASHBOARD ======== -->
+    <section class="section active" id="sec-dashboard">
+      <div class="sect-head">
+        <div><h2>Analytics</h2><div class="sub">Overview of subscriptions, revenue, and access status.</div></div>
+        <button class="btn btn-primary" id="refresh-btn">Refresh</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><span class="lbl">Total Subscriptions</span><div class="val" id="st-total">&mdash;</div><div class="hint">All-time issued</div></div>
+        <div class="stat-card accent"><span class="lbl">Total Revenue</span><div class="val" id="st-revenue">&mdash;</div><div class="hint">Verified payments</div></div>
+        <div class="stat-card"><span class="lbl">Active</span><div class="val" id="st-active">&mdash;</div><div class="hint">Currently valid</div></div>
+        <div class="stat-card amber"><span class="lbl">Expired</span><div class="val" id="st-expired">&mdash;</div><div class="hint">Past expiry date</div></div>
+        <div class="stat-card red"><span class="lbl">Revoked</span><div class="val" id="st-revoked">&mdash;</div><div class="hint">Removed access</div></div>
+        <div class="stat-card green"><span class="lbl">Verified</span><div class="val" id="st-verified">&mdash;</div><div class="hint">Payments confirmed</div></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <h3>Subscriptions Over Time</h3>
+          <div class="range-tabs" id="range-tabs">
+            <button class="range-tab" data-range="day">Day</button>
+            <button class="range-tab active" data-range="week">Week</button>
+            <button class="range-tab" data-range="month">Month</button>
+          </div>
+        </div>
+        <p class="sub">Count of new subscriptions issued per period.</p>
+        <div class="chart-box" id="chart-box"><p class="empty">No data yet.</p></div>
+      </div>
+
+      <div class="card">
+        <h3>Revenue by Plan</h3>
+        <p class="sub">All-time count and verified revenue per plan.</p>
+        <div class="table-scroll">
+          <table><thead><tr><th>Plan</th><th>Count</th><th>Revenue</th></tr></thead>
+          <tbody id="plan-rows"><tr><td colspan="3"><div class="empty">No data.</div></td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== GENERATE ======== -->
+    <section class="section" id="sec-generate">
+      <div class="sect-head">
+        <div><h2>Generate License Code</h2><div class="sub">Create a unique, human-shareable code linked to a plan and expiry.</div></div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="field">
+            <label>Plan</label>
+            <select id="gen-plan">
+              <option value="Starter">Starter (1M)</option>
+              <option value="Professional">Professional (3M)</option>
+              <option value="Lifetime">Lifetime (LT)</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+          <div class="field" id="customPlanField" style="display:none;">
+            <label>Custom Plan Name</label>
+            <input type="text" id="gen-custom-plan" placeholder="e.g. Corporate 6M">
+          </div>
+          <div class="field">
+            <label>Expiry Duration</label>
+            <select id="gen-expiry">
+              <option value="1m">1 Month</option>
+              <option value="3m">3 Months</option>
+              <option value="lt">Lifetime / No expiry</option>
+              <option value="custom">Custom date...</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Note (optional)</label>
+            <input type="text" id="gen-note" placeholder="e.g. personal gift, bulk">
+          </div>
+        </div>
+        <div class="field" id="customDateField" style="margin-top:14px;">
+          <label>Manual Expiry Date</label>
+          <input type="date" id="gen-date">
+          <div class="hint">Code will auto-expire at end of this date. Leave empty for no expiry.</div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="btn btn-primary" id="generate-btn">Generate Code</button>
+        </div>
+        <div class="gen-result" id="gen-result">
+          <div>
+            <div class="gen-code" id="gen-code-display"></div>
+            <button class="btn btn-sm btn-ghost" id="copy-code-btn">Copy</button>
+          </div>
+          <div class="gen-meta" id="gen-meta"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== SUBSCRIPTIONS ======== -->
+    <section class="section" id="sec-subs">
+      <div class="sect-head">
+        <div><h2>Subscriptions</h2><div class="sub">Search, filter, and manage every issued code and purchase record.</div></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search"><input type="text" id="search-input" placeholder="Search name, phone, email, or code..."></div>
+        <select class="tool-select" id="status-filter">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="expired">Expired</option>
+          <option value="revoked">Revoked</option>
+          <option value="pending">Pending</option>
+        </select>
+        <select class="tool-select" id="plan-filter">
+          <option value="">All plans</option>
+          <option value="Starter">Starter</option>
+          <option value="Professional">Professional</option>
+          <option value="Lifetime">Lifetime</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th><th>Plan</th><th>Status</th><th>Buyer</th><th>Contact</th>
+              <th>Amount</th><th>Payment</th><th>Issued</th><th>Expires</th><th>Devices</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="subs-tbody">
+            <tr><td colspan="11"><div class="empty">Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <button id="prev-page" disabled>&larr; Prev</button>
+        <span id="page-info"></span>
+        <button id="next-page" disabled>Next &rarr;</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box">
+    <button class="modal-close" data-close>&times;</button>
+    <h3 id="edit-title">Edit Subscription</h3>
+    <div class="edit-grid">
+      <div class="field"><label>Buyer Name</label><input type="text" id="e-name"></div>
+      <div class="field"><label>Phone / WhatsApp</label><input type="text" id="e-phone"></div>
+      <div class="field"><label>Email</label><input type="email" id="e-email"></div>
+      <div class="field"><label>Amount Paid</label><input type="number" id="e-amount" step="0.01" min="0"></div>
+      <div class="field"><label>Expires At</label><input type="datetime-local" id="e-expires"></div>
+      <div class="field"><label>Notes</label><input type="text" id="e-notes"></div>
+    </div>
+    <div class="toggle-row">
+      <span class="lbl">Payment Verified</span>
+      <input type="checkbox" id="e-verified" style="width:20px;height:20px;accent-color:var(--success);">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="e-revoke">Revoke Code</button>
+      <span style="flex:1"></span>
+      <button class="btn" data-close>Cancel</button>
+      <button class="btn btn-primary" id="e-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://gvkcwtoryrzgbtufsgff.supabase.co';
+const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2a2N3dG9yeXJ6Z2J0dWZzZ2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTAxODYsImV4cCI6MjA5ODgyNjE4Nn0.LuHf8rs8LXgqGY8Av4AkSlMtN3m2gcMaMwrH2h4tnfE';
+const ADMIN_EMAIL = 'teamalumorg@gmail.com';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const authScreen = document.getElementById('auth-screen');
+const dashboard = document.getElementById('dashboard');
+const googleLoginBtn = document.getElementById('google-login-btn');
+const signoutBtn = document.getElementById('signout-btn');
+const adminEmailEl = document.getElementById('admin-email');
+
+let ALL = [];
+let currentPage = 0;
+const PAGE_SIZE = 25;
+let editingId = null;
+let range = 'week';
+
+// ─── AUTH GATE ─────────────────────────────────────────────
+async function checkSession() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { authScreen.style.display = 'flex'; dashboard.style.display = 'none'; return; }
+  if (user.email !== ADMIN_EMAIL) {
+    await supabase.auth.signOut();
+    authScreen.style.display = 'flex';
+    document.getElementById('denied-msg').style.display = 'block';
+    googleLoginBtn.disabled = true;
+    setTimeout(() => { window.location.replace('/'); }, 1800);
+    return;
+  }
+  authScreen.style.display = 'none';
+  dashboard.style.display = 'block';
+  adminEmailEl.textContent = user.email;
+  await loadAll();
+}
+
+googleLoginBtn.addEventListener('click', async () => {
+  googleLoginBtn.disabled = true;
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + '/admin' }
+  });
+});
+signoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
+checkSession();
+
+// ─── DATA ──────────────────────────────────────────────────
+async function loadAll() {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .order('date_issued', { ascending: false });
+  ALL = error ? [] : (data || []);
+  renderTable();
+  renderDashboard();
+}
+
+// ─── STATS ─────────────────────────────────────────────────
+function computeStats() {
+  const s = { total: ALL.length, active: 0, expired: 0, revoked: 0, pending: 0, verified: 0, revenue: 0, byPlan: {} };
+  ALL.forEach(r => {
+    s[r.status] = (s[r.status] || 0) + 1;
+    const p = r.plan;
+    if (!s.byPlan[p]) s.byPlan[p] = { count: 0, revenue: 0 };
+    s.byPlan[p].count++;
+    if (r.payment_verified && r.amount_paid != null) {
+      s.revenue += Number(r.amount_paid);
+      s.verified++;
+      s.byPlan[p].revenue += Number(r.amount_paid);
+    }
+  });
+  return s;
+}
+
+function renderDashboard() {
+  const s = computeStats();
+  document.getElementById('st-total').textContent = s.total;
+  document.getElementById('st-revenue').textContent = '₹' + s.revenue.toLocaleString('en-IN');
+  document.getElementById('st-active').textContent = s.active || 0;
+  document.getElementById('st-expired').textContent = s.expired || 0;
+  document.getElementById('st-revoked').textContent = s.revoked || 0;
+  document.getElementById('st-verified').textContent = s.verified || 0;
+
+  const rows = document.getElementById('plan-rows');
+  const plans = Object.entries(s.byPlan).sort((a, b) => b[1].count - a[1].count);
+  if (!plans.length) { rows.innerHTML = '<tr><td colspan="3"><div class="empty">No data.</div></td></tr>'; return; }
+  rows.innerHTML = '';
+  plans.forEach(([p, v]) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="font-weight:600">${esc(p)}</td><td>${v.count}</td><td>₹${v.revenue.toLocaleString('en-IN')}</td>`;
+    rows.appendChild(tr);
+  });
+  renderChart();
+}
+
+// ─── TABLE ─────────────────────────────────────────────────
+function getFiltered() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const status = document.getElementById('status-filter').value;
+  const plan = document.getElementById('plan-filter').value;
+  return ALL.filter(r => {
+    if (status && r.status !== status) return false;
+    if (plan && r.plan !== plan) return false;
+    if (q) {
+      const hay = [r.code, r.buyer_name, r.buyer_phone, r.buyer_email].filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderTable() {
+  const tbody = document.getElementById('subs-tbody');
+  const filtered = getFiltered();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if (currentPage >= totalPages) currentPage = totalPages - 1;
+  const start = currentPage * PAGE_SIZE;
+  const pageRows = filtered.slice(start, start + PAGE_SIZE);
+
+  document.getElementById('page-info').textContent = filtered.length
+    ? `${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} of ${filtered.length}`
+    : '0 results';
+  document.getElementById('prev-page').disabled = currentPage === 0;
+  document.getElementById('next-page').disabled = currentPage >= totalPages - 1;
+
+  if (!pageRows.length) {
+    tbody.innerHTML = '<tr><td colspan="11"><div class="empty">' + (filtered.length ? 'Loading...' : 'No subscriptions match.') + '</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  pageRows.forEach(r => {
+    const plan = r.plan === 'Custom' ? (r.custom_plan_name || 'Custom') : r.plan;
+    const contact = [r.buyer_phone, r.buyer_email].filter(Boolean).join(' / ') || '—';
+    const amount = r.amount_paid != null ? '₹' + Number(r.amount_paid).toLocaleString('en-IN', { minimumFractionDigits: r.amount_paid % 1 ? 2 : 0 }) : '—';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="t-code">${esc(r.code)}</td>
+      <td>${esc(plan)}</td>
+      <td><span class="pill ${r.status}">${esc(r.status)}</span></td>
+      <td>${esc(r.buyer_name || '—')}</td>
+      <td>${esc(contact)}</td>
+      <td>${amount}</td>
+      <td><span class="pill ${r.payment_verified ? 'yes' : 'no'}">${r.payment_verified ? 'Verified' : 'Pending'}</span></td>
+      <td>${fmtDate(r.date_issued)}</td>
+      <td>${r.expires_at ? fmtDate(r.expires_at) : '<span style="color:var(--ink-soft)">Lifetime</span>'}</td>
+      <td style="text-align:center">${r.device_count || 0}<span style="color:var(--ink-soft)">/3</span></td>
+      <td><div class="row-actions">
+        <button class="btn btn-sm" data-edit="${r.id}">Edit</button>
+        <button class="btn btn-sm btn-ghost" data-toggle-pay="${r.id}">${r.payment_verified ? 'Unverify' : 'Verify'}</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openEdit(b.dataset.edit));
+  tbody.querySelectorAll('[data-toggle-pay]').forEach(b => b.onclick = () => togglePay(b.dataset.togglePay));
+}
+
+async function togglePay(id) {
+  const rec = ALL.find(r => r.id === id);
+  if (!rec) return;
+  const next = !rec.payment_verified;
+  const { error } = await supabase.from('subscriptions').update({ payment_verified: next, payment_verified_at: next ? new Date().toISOString() : null }).eq('id', id);
+  if (error) { toast('Update failed'); return; }
+  toast(next ? 'Payment verified' : 'Payment unverified');
+  await loadAll();
+}
+
+// ─── EDIT MODAL ────────────────────────────────────────────
+function openEdit(id) {
+  const r = ALL.find(x => x.id === id);
+  if (!r) return;
+  editingId = id;
+  document.getElementById('e-name').value = r.buyer_name || '';
+  document.getElementById('e-phone').value = r.buyer_phone || '';
+  document.getElementById('e-email').value = r.buyer_email || '';
+  document.getElementById('e-amount').value = r.amount_paid != null ? r.amount_paid : '';
+  document.getElementById('e-expires').value = r.expires_at ? toLocalInput(r.expires_at) : '';
+  document.getElementById('e-notes').value = r.notes || '';
+  document.getElementById('e-verified').checked = !!r.payment_verified;
+  document.getElementById('e-revoke').style.display = r.status === 'revoked' ? 'none' : 'inline-flex';
+  document.getElementById('edit-title').textContent = `Edit — ${r.code}`;
+  document.getElementById('edit-modal').classList.add('show');
+}
+
+document.getElementById('e-save').addEventListener('click', async () => {
+  const payload = {
+    buyer_name: document.getElementById('e-name').value.trim() || null,
+    buyer_phone: document.getElementById('e-phone').value.trim() || null,
+    buyer_email: document.getElementById('e-email').value.trim() || null,
+    amount_paid: document.getElementById('e-amount').value !== '' ? Number(document.getElementById('e-amount').value) : null,
+    notes: document.getElementById('e-notes').value.trim() || null,
+    payment_verified: document.getElementById('e-verified').checked,
+    payment_verified_at: document.getElementById('e-verified').checked ? new Date().toISOString() : null,
+    expires_at: document.getElementById('e-expires').value ? new Date(document.getElementById('e-expires').value).toISOString() : null,
+  };
+  const { error } = await supabase.from('subscriptions').update(payload).eq('id', editingId);
+  if (error) { toast('Failed to save'); return; }
+  closeModal();
+  toast('Saved');
+  await loadAll();
+});
+
+document.getElementById('e-revoke').addEventListener('click', async () => {
+  if (!confirm('Revoke this code? Access will stop immediately.')) return;
+  const { error } = await supabase.from('subscriptions').update({ status: 'revoked' }).eq('id', editingId);
+  if (error) { toast('Failed to revoke'); return; }
+  closeModal();
+  toast('Code revoked');
+  await loadAll();
+});
+
+document.querySelectorAll('[data-close]').forEach(el => el.onclick = closeModal);
+function closeModal() { document.getElementById('edit-modal').classList.remove('show'); editingId = null; }
+
+// ─── GENERATE ──────────────────────────────────────────────
+document.getElementById('gen-plan').addEventListener('change', e => {
+  document.getElementById('customPlanField').style.display = e.target.value === 'Custom' ? 'block' : 'none';
+});
+document.getElementById('gen-expiry').addEventListener('change', e => {
+  document.getElementById('customDateField').classList.toggle('show', e.target.value === 'custom');
+});
+
+function genCode(plan) {
+  const prefix = plan === 'Starter' ? '1M' : plan === 'Professional' ? '3M' : 'LT';
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return `TA-PE-${prefix}-${s}`;
+}
+
+document.getElementById('generate-btn').addEventListener('click', async () => {
+  const plan = document.getElementById('gen-plan').value;
+  const customPlan = document.getElementById('gen-custom-plan').value.trim();
+  const expirySel = document.getElementById('gen-expiry').value;
+  const note = document.getElementById('gen-note').value.trim();
+
+  let expiresAt = null;
+  const now = new Date();
+  if (expirySel === '1m') { const d = new Date(now); d.setMonth(d.getMonth() + 1); expiresAt = d.toISOString(); }
+  else if (expirySel === '3m') { const d = new Date(now); d.setMonth(d.getMonth() + 3); expiresAt = d.toISOString(); }
+  else if (expirySel === 'custom') { const v = document.getElementById('gen-date').value; if (v) expiresAt = new Date(v + 'T23:59:59').toISOString(); }
+
+  let code = genCode(plan);
+  for (let tries = 0; tries < 5; tries++) {
+    const { error } = await supabase.from('subscriptions').insert({
+      code, plan,
+      custom_plan_name: plan === 'Custom' ? (customPlan || null) : null,
+      status: 'active',
+      expires_at: expiresAt,
+      created_by: ADMIN_EMAIL,
+      notes: note || null,
+    });
+    if (!error) break;
+    code = genCode(plan);
+  }
+
+  const expiryLabel = expiresAt ? fmtDate(expiresAt) : 'No expiry (Lifetime)';
+  document.getElementById('gen-code-display').textContent = code;
+  document.getElementById('gen-meta').innerHTML = `<strong>${esc(plan)}</strong> &middot; expires <strong>${expiryLabel}</strong>${customPlan ? ' &middot; ' + esc(customPlan) : ''}`;
+  document.getElementById('gen-result').classList.add('show');
+  document.getElementById('copy-code-btn').onclick = () => { navigator.clipboard.writeText(code).then(() => toast('Code copied')); };
+  toast('Code generated');
+  await loadAll();
+});
+
+// ─── CHART (lightweight hand-rolled SVG) ───────────────────
+function toDay(d) { const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
+function toWeek(d) { const jan1 = new Date(d.getFullYear(), 0, 1); const wk = Math.ceil(((d - jan1) / 864e5 + jan1.getDay() + 1) / 7); return d.getFullYear() + '-W' + String(wk).padStart(2, '0'); }
+function toMonth(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+
+const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function labelFor(k) {
+  if (k.indexOf('-W') > -1) { const [y, w] = k.split('-W'); return 'W' + Number(w) + ' ' + y.slice(2); }
+  if (k.length === 7) return MONTH_SHORT[Number(k.split('-')[1]) - 1];
+  const [y, m, d] = k.split('-'); return Number(d) + ' ' + MONTH_SHORT[Number(m) - 1];
+}
+
+function renderChart() {
+  const box = document.getElementById('chart-box');
+  if (!ALL.length) { box.innerHTML = '<p class="empty">No data yet.</p>'; return; }
+  const now = new Date();
+
+  const countMap = {};
+  let max = 0;
+  ALL.forEach(r => {
+    const d = new Date(r.date_issued);
+    const k = range === 'day' ? toDay(d) : range === 'week' ? toWeek(d) : toMonth(d);
+    countMap[k] = (countMap[k] || 0) + 1;
+    if (countMap[k] > max) max = countMap[k];
+  });
+
+  const keys = Object.keys(countMap).sort();
+  const maxK = Math.max(1, max);
+  const nice = n => { if (n <= 3) return 3; const m = Math.pow(10, Math.floor(Math.log10(n))); const nm = n / m; const s = nm <= 1 ? 1 : nm <= 2 ? 2 : nm <= 2.5 ? 2.5 : nm <= 5 ? 5 : 10; return s * m; };
+  const yMax = nice(maxK);
+
+  const W = 760, H = 260, pL = 36, pR = 12, pT = 14, pB = 34;
+  const iw = W - pL - pR, ih = H - pT - pB;
+  const step = iw / Math.max(1, keys.length - 1);
+
+  let path = '', dots = '', grid = '', xlabels = '';
+  keys.forEach((k, i) => {
+    const x = pL + i * step;
+    const y = pT + ih - (countMap[k] / yMax) * ih;
+    path += (i ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+    if (i % Math.ceil(keys.length / 8) === 0 || i === keys.length - 1) {
+      dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="var(--blue-bright)"><title>${labelFor(k)}: ${countMap[k]}</title></circle>`;
+      xlabels += `<text x="${x.toFixed(1)}" y="${H - 10}" text-anchor="middle" font-size="10" fill="var(--ink-soft)" font-family="Inter,sans-serif">${labelFor(k)}</text>`;
+    }
+  });
+  [0, 0.5, 1].forEach(f => {
+    const y = pT + ih * (1 - f);
+    grid += `<line x1="${pL}" y1="${y}" x2="${pL + iw}" y2="${y}" stroke="#eef2f8"/>`;
+    grid += `<text x="${pL - 8}" y="${y + 4}" text-anchor="end" font-size="10" fill="var(--ink-soft)" font-family="Inter,sans-serif">${Math.round(yMax * f)}</text>`;
+  });
+
+  const area = path + `L${pL + iw},${pT + ih} L${pL},${pT + ih} Z`;
+  box.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Subscriptions over time">
+      ${grid}${xlabels}
+      <path d="${area}" fill="rgba(47,123,245,.10)"/>
+      <path d="${path}" fill="none" stroke="var(--blue-bright)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}
+    </svg>
+    <div class="chart-legend">
+      <span><span class="chart-dot" style="background:var(--blue-bright)"></span> New subscriptions (${range})</span>
+      <span>Latest: <strong>${countMap[keys[keys.length - 1]] || 0}</strong></span>
+    </div>`;
+}
+
+// ─── RANGE TABS ────────────────────────────────────────────
+document.querySelectorAll('#range-tabs .range-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#range-tabs .range-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    range = tab.dataset.range;
+    renderChart();
+  });
+});
+
+// ─── MAIN TABS ─────────────────────────────────────────────
+document.querySelectorAll('#admin-tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#admin-tabs .tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'dashboard') renderChart();
+  });
+});
+
+// ─── SEARCH / FILTER / PAGER ───────────────────────────────
+['input', 'change'].forEach(evt => {
+  document.getElementById('search-input').addEventListener(evt, () => { currentPage = 0; renderTable(); });
+  document.getElementById('status-filter').addEventListener(evt, () => { currentPage = 0; renderTable(); });
+  document.getElementById('plan-filter').addEventListener(evt, () => { currentPage = 0; renderTable(); });
+});
+document.getElementById('prev-page').addEventListener('click', () => { currentPage--; renderTable(); });
+document.getElementById('next-page').addEventListener('click', () => { currentPage++; renderTable(); });
+document.getElementById('refresh-btn').addEventListener('click', async () => { toast('Refreshing...'); await loadAll(); toast('Refreshed'); });
+
+// ─── HELPERS ───────────────────────────────────────────────
+function esc(str) { const d = document.createElement('div'); d.textContent = str == null ? '' : String(str); return d.innerHTML; }
+function fmtDate(iso) { if (!iso) return '—'; return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
+function toLocalInput(iso) { const d = new Date(iso); const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); }
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2500); }
+</script>
+</body>
+</html>

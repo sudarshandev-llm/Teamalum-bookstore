@@ -3,725 +3,809 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>Bookstore Admin — Team Alum</title>
+<title>Admin — Team Alum Publishing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Lora:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--paper:#fff;--paper-2:#eaf4ff;--ink:#132339;--ink-soft:#3c5978;--blue-deep:#0a2a52;--blue-bright:#2f7bf5;--blue-glass:#bcd8ff;--gold:#cfae5e;--light-blue:#eaf4ff;--shadow-soft:0 10px 24px -10px rgba(10,42,82,.18);--success:#5cb85c;--warning:#f0ad4e;--danger:#d9534f;--radius:14px;--radius-lg:20px;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Lora',serif;color:var(--ink);background:var(--paper-2);-webkit-font-smoothing:antialiased;}
-h1,h2,h3{font-family:'Playfair Display',serif;color:var(--blue-deep);line-height:1.2;}
-button{font-family:'Inter',sans-serif;cursor:pointer;}
-input,select,textarea{font-family:'Inter',sans-serif;}
+:root{
+  --navy:#0a2a52; --navy-2:#0f3a6e; --blue-bright:#3b82f6; --ink:#1c2430; --ink-soft:#5b6675;
+  --bg:#f4f6fa; --card:#ffffff; --line:#e5e9f0; --success:#16a34a; --warn:#d97706;
+  --danger:#dc2626; --purple:#7c3aed; --teal:#0d9488;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+a{color:var(--blue-bright);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:13px}
 
-/* Auth */
-.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-.auth-card{max-width:420px;width:100%;background:var(--paper);border-radius:var(--radius-lg);box-shadow:var(--shadow-soft);padding:48px 36px;text-align:center;border:1px solid rgba(10,42,82,.06);}
-.auth-card h2{margin-bottom:8px;}
-.auth-card p{color:var(--ink-soft);font-size:15px;margin-bottom:28px;}
-.auth-card .denied{color:var(--danger);font-size:14px;margin-top:14px;display:none;}
-.google-btn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #e0e6ed;border-radius:999px;padding:14px 28px;font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--ink);box-shadow:0 2px 8px rgba(10,42,82,.1);transition:all .2s;}
-.google-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(10,42,82,.16);}
-.google-btn:disabled{opacity:.5;transform:none;cursor:default;}
-.google-btn svg{width:20px;height:20px;}
+/* ------- Login ------- */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a2a52 0%,#0f3a6e 60%,#14508c 100%);padding:20px}
+.login-card{background:#fff;border-radius:16px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login-card h1{font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);margin-bottom:4px}
+.login-card .sub{color:var(--ink-soft);font-size:13px;margin-bottom:22px}
+.login-card .brand{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue-bright);font-weight:700;margin-bottom:10px}
+.shield{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#0a2a52,#14508c);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:26px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px}
+.field input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;outline:none;transition:.2s}
+.field input:focus{border-color:var(--blue-bright);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#0a2a52,#14508c);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:14px}
+.btn-primary:hover{opacity:.93}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.msg{margin-top:14px;font-size:12px;text-align:center;min-height:16px}
+.msg.err{color:var(--danger)}
+.msg.ok{color:var(--success)}
+.note{margin-top:16px;font-size:11px;color:var(--ink-soft);text-align:center;line-height:1.5}
 
-/* Layout */
-.topbar{background:var(--paper);border-bottom:1px solid rgba(10,42,82,.08);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;}
-.brand{display:flex;align-items:center;gap:10px;}
-.brand .logo{width:36px;height:36px;border-radius:10px;background:var(--blue-deep);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:15px;}
-.brand .t1{font-family:'Playfair Display',serif;font-weight:700;color:var(--blue-deep);font-size:16px;}
-.brand .t2{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-soft);}
-.top-right{display:flex;align-items:center;gap:14px;}
-.admin-email{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
-.btn{font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:7px;border-radius:10px;padding:9px 18px;font-weight:600;font-size:13px;border:1.5px solid #e0e6ed;background:#fff;color:var(--ink);transition:all .18s;}
-.btn:hover{box-shadow:0 4px 12px rgba(10,42,82,.12);transform:translateY(-1px);}
-.btn-primary{background:var(--blue-bright);border-color:var(--blue-bright);color:#fff;}
-.btn-primary:hover{background:#1e63d0;}
-.btn-sm{padding:6px 13px;font-size:12px;border-radius:8px;}
-.btn-ghost{background:transparent;border-color:transparent;color:var(--blue-bright);box-shadow:none;}
-.btn-ghost:hover{background:var(--light-blue);transform:none;box-shadow:none;}
-.btn-danger{background:#fff;border-color:#f2c5c2;color:var(--danger);}
-.btn-danger:hover{background:#fdefee;}
+/* ------- App shell ------- */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:236px;background:linear-gradient(180deg,#0a2a52,#0d315f);color:#dfe7f3;flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sidebar .sb-brand{display:flex;align-items:center;gap:10px;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar .sb-brand .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#14508c);display:flex;align-items:center;justify-content:center;font-size:17px}
+.sidebar .sb-brand .t1{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fff;line-height:1.1}
+.sidebar .sb-brand .t2{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8aa0bd}
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto}
+.sb-nav .grp{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#6f87a5;padding:10px 12px 6px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border:none;background:transparent;color:#c3d0e2;border-radius:8px;font-size:13px;font-weight:500;text-align:left;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:linear-gradient(135deg,#3b82f6,#14508c);color:#fff}
+.nav-item .ico{width:18px;text-align:center}
+.sb-foot{padding:14px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-user{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sb-user .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#14508c);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.sb-user .nm{font-size:12px;font-weight:600;color:#fff;line-height:1.2}
+.sb-user .em{font-size:10px;color:#8aa0bd;word-break:break-all}
+.btn-outline-light{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,.3);color:#dfe7f3;border-radius:8px;font-size:12px;font-weight:600}
+.btn-outline-light:hover{background:rgba(255,255,255,.08)}
 
-/* Main content */
-.wrap{max-width:1200px;margin:0 auto;padding:28px 28px 80px;}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:14px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.topbar h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy)}
+.topbar .crumb{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.topbar .right{display:flex;align-items:center;gap:12px}
+.refresh-btn{padding:8px 14px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:12px;font-weight:600;color:var(--ink)}
+.refresh-btn:hover{border-color:var(--blue-bright);color:var(--blue-bright)}
 
-/* Tabs */
-.tabs{display:inline-flex;gap:4px;background:var(--paper);border:1px solid rgba(10,42,82,.08);padding:6px;border-radius:12px;margin-bottom:24px;}
-.tab{border:none;background:transparent;padding:10px 20px;border-radius:8px;font-weight:600;font-size:14px;color:var(--ink-soft);transition:all .18s;}
-.tab:hover{color:var(--ink);}
-.tab.active{background:var(--blue-deep);color:#fff;}
+.content{padding:26px;flex:1}
+.page{display:none}
+.page.active{display:block}
 
-.section{display:none;}
-.section.active{display:block;}
-.sect-head{margin-bottom:20px;}
-.sect-head h2{margin-bottom:4px;}
-.sect-head .sub{color:var(--ink-soft);font-size:14px;}
+/* ------- Stat cards ------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.stat .lbl{font-size:12px;color:var(--ink-soft);font-weight:500}
+.stat .val{font-size:26px;font-weight:700;margin-top:6px;color:var(--navy);font-variant-numeric:tabular-nums}
+.stat .val small{font-size:13px;font-weight:600;color:var(--ink-soft)}
+.stat .sub{font-size:11px;color:var(--ink-soft);margin-top:4px}
+.stat .trend{font-size:11px;font-weight:600;margin-top:6px;padding:2px 6px;border-radius:6px;display:inline-block}
+.trend.up{background:#dcfce7;color:#15803d}
+.trend.down{background:#fee2e2;color:#b91c1c}
+.stat .accent{position:absolute;top:-24px;right:-24px;width:70px;height:70px;border-radius:50%;opacity:.1}
+.ac-blue{background:#3b82f6}.ac-green{background:#16a34a}.ac-amber{background:#d97706}.ac-purple{background:#7c3aed}.ac-teal{background:#0d9488}.ac-rose{background:#e11d48}
 
-/* Stat cards */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
-.stat-card{background:var(--paper);border:1px solid rgba(10,42,82,.06);border-radius:var(--radius-lg);padding:20px 22px;box-shadow:var(--shadow-soft);}
-.stat-card .lbl{font-family:'Inter',sans-serif;font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);}
-.stat-card .val{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--blue-deep);margin-top:6px;}
-.stat-card .hint{font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-soft);margin-top:3px;}
-.stat-card.accent .val{color:var(--blue-bright);}
-.stat-card.green .val{color:var(--success);}
-.stat-card.red .val{color:var(--danger);}
-.stat-card.amber .val{color:var(--warning);}
+/* ------- Panels / cards ------- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:22px}
+.panel-hd{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.panel-hd h3{font-size:15px;color:var(--navy);font-family:'Playfair Display',serif}
+.panel-hd .desc{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.panel-bd{padding:20px}
 
-/* Card */
-.card{background:var(--paper);border:1px solid rgba(10,42,82,.06);border-radius:var(--radius-lg);padding:22px 24px;box-shadow:var(--shadow-soft);margin-bottom:22px;}
-.card h3{font-size:18px;margin-bottom:12px;}
-.card .sub{font-size:13px;color:var(--ink-soft);margin-bottom:14px;}
+/* ------- Tables ------- */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:11px 14px;color:var(--ink-soft);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--line);white-space:nowrap;background:#fafbfd}
+tbody td{padding:11px 14px;border-bottom:1px solid #f0f2f6;vertical-align:middle}
+tbody tr:hover{background:#f8fafc}
+tbody tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.b-success{background:#dcfce7;color:#15803d}
+.b-warn{background:#fef3c7;color:#b45309}
+.b-danger{background:#fee2e2;color:#b91c1c}
+.b-neutral{background:#e5e9f0;color:#4b5563}
+.b-info{background:#dbeafe;color:#1d4ed8}
+.b-purple{background:#ede9fe;color:#6d28d9}
+.b-teal{background:#ccfbf1;color:#0f766e}
+.b-navy{background:#dbe7f7;color:#0a2a52}
+.avatar-sm{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#14508c);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px}
+.empty{padding:40px;text-align:center;color:var(--ink-soft);font-size:13px}
+.empty .big{font-size:32px;margin-bottom:8px}
 
-/* Chart */
-.chart-box svg{width:100%;height:auto;display:block;}
-.chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);}
-.chart-legend span{display:inline-flex;align-items:center;gap:6px;}
-.chart-dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+/* ------- Buttons ------- */
+.btn{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid transparent;display:inline-flex;align-items:center;gap:6px}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--blue-bright);color:var(--blue-bright)}
+.btn-blue{background:linear-gradient(135deg,#0a2a52,#14508c);color:#fff}
+.btn-blue:hover{opacity:.93}
+.btn-danger{background:#fff;border-color:#fecaca;color:var(--danger)}
+.btn-danger:hover{background:#fee2e2}
+.btn-warn{background:#fff;border-color:#fde68a;color:#b45309}
+.btn-warn:hover{background:#fef3c7}
 
-.range-tabs{display:inline-flex;background:var(--paper-2);border:1px solid rgba(10,42,82,.08);border-radius:10px;padding:3px;}
-.range-tab{border:none;background:transparent;padding:7px 14px;border-radius:8px;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;color:var(--ink-soft);}
-.range-tab.active{background:var(--blue-deep);color:#fff;}
+/* ------- Forms / filters ------- */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.search-box{position:relative;flex:1;min-width:200px;max-width:360px}
+.search-box input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:8px;outline:none;background:#fff}
+.search-box input:focus{border-color:var(--blue-bright);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.search-box .sico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9aa6b6;font-size:13px}
+select.filter{padding:9px 20px 9px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;outline:none}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;outline:none;background:#fff}
+.form-input:focus{border-color:var(--blue-bright);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+textarea.form-input{resize:vertical;min-height:80px}
 
-/* Form */
-.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;}
-.field label{display:block;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
-.field select,.field input{width:100%;padding:10px 13px;border:1.5px solid #e0e6ed;border-radius:10px;font-size:14px;background:#fff;color:var(--ink);}
-.field select:focus,.field input:focus{outline:none;border-color:var(--blue-bright);}
-.field .hint{font-family:'Inter',sans-serif;font-size:11px;color:var(--ink-soft);margin-top:5px;}
-#customDateField{display:none;}
-#customDateField.show{display:block;}
+/* ------- Tabs ------- */
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:9px 15px;font-size:12px;font-weight:600;color:var(--ink-soft);background:none;border:none;border-bottom:2px solid transparent}
+.tab:hover{color:var(--navy)}
+.tab.active{color:var(--navy);border-bottom-color:var(--blue-bright)}
 
-.gen-result{margin-top:16px;display:none;}
-.gen-result.show{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#eef7f0;border:1px solid #cfe8d5;border-radius:12px;padding:14px 18px;}
-.gen-code{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;letter-spacing:2px;color:var(--success);}
-.gen-meta{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);flex:1;}
+/* ------- Toast ------- */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px}
+.toast{background:#1c2430;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;align-items:center;gap:9px;animation:slideIn .25s ease}
+.toast.ok{background:#14532d}
+.toast.err{background:#7f1d1d}
+.toast .tdot{width:8px;height:8px;border-radius:50%;background:#22c55e}
+.toast.err .tdot{background:#f87171}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 
-/* Table */
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
-.search{flex:1;min-width:220px;}
-.search input{width:100%;padding:11px 14px;border:1.5px solid #e0e6ed;border-radius:12px;font-size:14px;}
-.search input:focus{outline:none;border-color:var(--blue-bright);}
-.tool-select{padding:10px 13px;border:1.5px solid #e0e6ed;border-radius:12px;font-size:13px;background:#fff;color:var(--ink);}
-.table-scroll{overflow-x:auto;border:1px solid rgba(10,42,82,.06);border-radius:14px;background:#fff;}
-table{width:100%;border-collapse:collapse;font-family:'Inter',sans-serif;font-size:13px;min-width:900px;}
-th{background:var(--paper-2);text-align:left;padding:12px 14px;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid #e0e6ed;white-space:nowrap;}
-td{padding:12px 14px;border-bottom:1px solid #f1f4f9;vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:#fafcff;}
-.t-code{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--blue-deep);letter-spacing:.5px;}
-.pill{display:inline-block;padding:3px 11px;border-radius:999px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;}
-.pill.active{background:#e7f6ec;color:#1e7a41;}
-.pill.expired{background:#fdeeec;color:#c0392b;}
-.pill.revoked{background:#f5ecf8;color:#8e44ad;}
-.pill.pending{background:#fdf3e3;color:#b9770e;}
-.pill.yes{background:#e7f6ec;color:#1e7a41;}
-.pill.no{background:#f4f6f9;color:var(--ink-soft);}
-.row-actions{display:flex;gap:6px;}
-.empty{text-align:center;padding:44px 20px;color:var(--ink-soft);font-family:'Inter',sans-serif;font-size:14px;}
-.pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:16px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);}
-.pager button{border:1.5px solid #e0e6ed;background:#fff;border-radius:8px;padding:6px 14px;font-weight:600;}
-.pager button:disabled{opacity:.4;cursor:default;}
+/* ------- Modal ------- */
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,35,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 70px rgba(0,0,0,.35)}
+.modal-hd{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal-hd h3{font-family:'Playfair Display',serif;color:var(--navy);font-size:17px}
+.modal-x{background:none;border:none;font-size:22px;color:var(--ink-soft);line-height:1}
+.modal-x:hover{color:var(--danger)}
+.modal-bd{padding:22px}
+.modal-ft{padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+.row-detail{display:flex;font-size:13px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.row-detail .k{width:150px;color:var(--ink-soft);flex-shrink:0}
+.row-detail .v{font-weight:500;word-break:break-all}
 
-/* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(10,42,82,.5);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:4vh 16px;z-index:100;overflow-y:auto;}
-.modal-overlay.show{display:flex;}
-.modal-box{background:var(--paper);border-radius:var(--radius-lg);max-width:560px;width:100%;padding:30px 32px;box-shadow:0 20px 60px rgba(10,42,82,.25);position:relative;}
-.modal-box h3{margin-bottom:16px;}
-.modal-close{position:absolute;top:16px;right:16px;border:none;background:#f1f4f9;width:32px;height:32px;border-radius:50%;font-size:16px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;}
-.modal-close:hover{background:#e4e8ed;}
-.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--paper-2);border:1px solid #e0e6ed;border-radius:10px;padding:10px 14px;margin-top:12px;}
-.toggle-row .lbl{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+.loading{display:flex;align-items:center;justify-content:center;padding:50px;color:var(--ink-soft);font-size:13px;gap:10px}
+.spinner{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--blue-bright);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--blue-deep);color:#fff;padding:12px 24px;border-radius:999px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;opacity:0;transition:.3s;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.2);pointer-events:none;}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+/* ------- Charts ------- */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+@media(max-width:900px){.chart-row{grid-template-columns:1fr}}
+.bar-track{background:#eef1f7;border-radius:8px;height:8px;overflow:hidden;margin-top:6px}
+.bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#0a2a52,#14508c)}
+.bar-fill.teal{background:linear-gradient(90deg,#0d9488,#0f766e)}
+.bar-fill.green{background:linear-gradient(90deg,#16a34a,#15803d)}
+.bar-fill.amber{background:linear-gradient(90deg,#d97706,#b45309)}
+.bar-fill.purple{background:linear-gradient(90deg,#7c3aed,#6d28d9)}
+.legend{font-size:11px;color:var(--ink-soft)}
+.kv-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv{display:flex;justify-content:space-between;font-size:12px;padding:8px 12px;background:#f8fafc;border-radius:8px}
+.kv .k{color:var(--ink-soft)}
+.kv .v{font-weight:700;color:var(--navy)}
 
-@media(max-width:720px){
-  .wrap{padding:18px 14px 60px;}
-  .topbar{padding:12px 14px;}
-  .admin-email{display:none;}
-  .edit-grid{grid-template-columns:1fr;}
-  .stats-grid{grid-template-columns:1fr 1fr;}
+@media(max-width:760px){
+  .shell{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:static}
+  .sb-nav{display:flex;flex-wrap:wrap}
+  .nav-item{width:auto}
+  .grid-2{grid-template-columns:1fr}
+  .content{padding:16px}
+  .topbar{padding:12px 16px}
 }
 </style>
 </head>
 <body>
 
-<!-- Auth screen -->
-<div class="auth-wrap" id="auth-screen" style="display:none;">
-  <div class="auth-card">
-    <h2>Bookstore Admin</h2>
-    <p>Sign in to manage subscriptions and licenses.</p>
-    <button class="google-btn" id="google-login-btn"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.2 6.2 29.4 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.1 18.9 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34.2 6.2 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.6-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>Sign in with Google</button>
-    <p class="denied" id="denied-msg">Access denied. Redirecting...</p>
+<!-- ================= LOGIN ================= -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="brand">Team Alum Publishing</div>
+    <div class="shield">🛡️</div>
+    <h1>Admin Panel</h1>
+    <div class="sub">Restricted access. Sign in with Google to continue.</div>
+    <button class="btn-primary" id="googleBtn" onclick="login()">Continue with Google</button>
+    <div class="msg" id="loginMsg"></div>
+    <div class="note">Access is restricted to the authorized administrator email only. Only <b>teamalumorg@gmail.com</b> can sign in. Others will be blocked automatically.</div>
   </div>
 </div>
 
-<!-- Dashboard -->
-<div id="dashboard" style="display:none;">
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo">TA</div>
+<!-- ================= APP SHELL ================= -->
+<div class="shell" id="appShell" style="display:none">
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="logo">📚</div>
       <div>
-        <div class="t1">Bookstore Admin</div>
-        <div class="t2">Prompt Engineering Blueprint</div>
+        <div class="t1">Team Alum</div>
+        <div class="t2">Admin Console</div>
       </div>
     </div>
-    <div class="top-right">
-      <span class="admin-email" id="admin-email"></span>
-      <a class="btn btn-ghost" href="/" target="_blank" rel="noopener">Open Storefront</a>
-      <button class="btn" id="signout-btn">Sign out</button>
-    </div>
-  </div>
-
-  <div class="wrap">
-    <div class="tabs" id="admin-tabs">
-      <button class="tab active" data-tab="dashboard">Dashboard</button>
-      <button class="tab" data-tab="generate">Generate Code</button>
-      <button class="tab" data-tab="subscriptions">Subscriptions</button>
-    </div>
-
-    <!-- ======== DASHBOARD ======== -->
-    <section class="section active" id="sec-dashboard">
-      <div class="sect-head">
-        <div><h2>Analytics</h2><div class="sub">Overview of subscriptions, revenue, and access status.</div></div>
-        <button class="btn btn-primary" id="refresh-btn">Refresh</button>
+    <nav class="sb-nav">
+      <div class="grp">Overview</div>
+      <button class="nav-item active" data-page="dashboard" onclick="go('dashboard',this)">
+        <span class="ico">📊</span>Dashboard
+      </button>
+      <button class="nav-item" data-page="users" onclick="go('users',this)">
+        <span class="ico">👥</span>Users
+      </button>
+      <div class="grp">Commerce</div>
+      <button class="nav-item" data-page="licenses" onclick="go('licenses',this)">
+        <span class="ico">🔑</span>Licenses
+      </button>
+      <button class="nav-item" data-page="codes" onclick="go('codes',this)">
+        <span class="ico">🎟️</span>Redeem Codes
+      </button>
+      <div class="grp">Growth</div>
+      <button class="nav-item" data-page="analytics" onclick="go('analytics',this)">
+        <span class="ico">📈</span>Analytics
+      </button>
+      <button class="nav-item" data-page="newsletter" onclick="go('newsletter',this)">
+        <span class="ico">✉️</span>Newsletter
+      </button>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="avatar" id="sbAvatar">A</div>
+        <div><div class="nm" id="sbName">Admin</div><div class="em" id="sbEmail">—</div></div>
       </div>
+      <button class="btn-outline-light" onclick="logout()">Sign Out</button>
+    </div>
+  </aside>
 
-      <div class="stats-grid">
-        <div class="stat-card"><span class="lbl">Total Subscriptions</span><div class="val" id="st-total">&mdash;</div><div class="hint">All-time issued</div></div>
-        <div class="stat-card accent"><span class="lbl">Total Revenue</span><div class="val" id="st-revenue">&mdash;</div><div class="hint">Verified payments</div></div>
-        <div class="stat-card"><span class="lbl">Active</span><div class="val" id="st-active">&mdash;</div><div class="hint">Currently valid</div></div>
-        <div class="stat-card amber"><span class="lbl">Expired</span><div class="val" id="st-expired">&mdash;</div><div class="hint">Past expiry date</div></div>
-        <div class="stat-card red"><span class="lbl">Revoked</span><div class="val" id="st-revoked">&mdash;</div><div class="hint">Removed access</div></div>
-        <div class="stat-card green"><span class="lbl">Verified</span><div class="val" id="st-verified">&mdash;</div><div class="hint">Payments confirmed</div></div>
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="pageTitle">Dashboard</h2>
+        <div class="crumb" id="pageCrumb">Overview · Real-time metrics</div>
       </div>
+      <div class="right">
+        <span class="legend" id="lastUpdated"></span>
+        <button class="refresh-btn" onclick="refreshAll()">↻ Refresh</button>
+      </div>
+    </div>
 
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-          <h3>Subscriptions Over Time</h3>
-          <div class="range-tabs" id="range-tabs">
-            <button class="range-tab" data-range="day">Day</button>
-            <button class="range-tab active" data-range="week">Week</button>
-            <button class="range-tab" data-range="month">Month</button>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats" id="dashStats"></div>
+        <div class="chart-row">
+          <div class="panel">
+            <div class="panel-hd"><h3>Licenses by Plan</h3></div>
+            <div class="panel-bd" id="planBars"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hd"><h3>Pricing Breakdown</h3></div>
+            <div class="panel-bd" id="priceKv"></div>
           </div>
         </div>
-        <p class="sub">Count of new subscriptions issued per period.</p>
-        <div class="chart-box" id="chart-box"><p class="empty">No data yet.</p></div>
-      </div>
-
-      <div class="card">
-        <h3>Revenue by Plan</h3>
-        <p class="sub">All-time count and verified revenue per plan.</p>
-        <div class="table-scroll">
-          <table><thead><tr><th>Plan</th><th>Count</th><th>Revenue</th></tr></thead>
-          <tbody id="plan-rows"><tr><td colspan="3"><div class="empty">No data.</div></td></tr></tbody></table>
+        <div class="panel">
+          <div class="panel-hd"><h3>Recent Users</h3><button class="btn btn-ghost btn-sm" onclick="go('users',null)">View all →</button></div>
+          <div class="table-wrap"><table id="recentUsersTable"></table></div>
         </div>
       </div>
-    </section>
 
-    <!-- ======== GENERATE ======== -->
-    <section class="section" id="sec-generate">
-      <div class="sect-head">
-        <div><h2>Generate License Code</h2><div class="sub">Create a unique, human-shareable code linked to a plan and expiry.</div></div>
+      <!-- USERS -->
+      <div class="page" id="page-users">
+        <div class="toolbar">
+          <div class="search-box"><span class="sico">🔍</span><input id="userSearch" placeholder="Search name or email..." oninput="renderUsers()"></div>
+          <select class="filter" id="userRoleFilter" onchange="renderUsers()">
+            <option value="">All roles</option><option value="user">User</option>
+            <option value="admin">Admin</option><option value="super_admin">Super Admin</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="exportUsers()">⬇ Export CSV</button>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><h3>All Users</h3><span class="desc" id="userCount"></span></div>
+          <div class="table-wrap"><table id="usersTable"></table></div>
+        </div>
       </div>
-      <div class="card">
-        <div class="form-grid">
-          <div class="field">
-            <label>Plan</label>
-            <select id="gen-plan">
-              <option value="Starter">Starter (1M)</option>
-              <option value="Professional">Professional (3M)</option>
-              <option value="Lifetime">Lifetime (LT)</option>
-              <option value="Custom">Custom</option>
+
+      <!-- LICENSES -->
+      <div class="page" id="page-licenses">
+        <div class="toolbar">
+          <div class="search-box"><span class="sico">🔍</span><input id="licenseSearch" placeholder="Search code or email..." oninput="renderLicenses()"></div>
+          <select class="filter" id="licenseStatusFilter" onchange="renderLicenses()">
+            <option value="">All statuses</option><option value="active">Active</option>
+            <option value="expired">Expired</option><option value="pending">Pending</option>
+            <option value="revoked">Revoked</option>
+          </select>
+          <button class="btn btn-warn btn-sm" onclick="runExpiryCheck()">⏰ Check Expiry</button>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><h3>All Licenses</h3><span class="desc" id="licenseCount"></span></div>
+          <div class="table-wrap"><table id="licensesTable"></table></div>
+        </div>
+      </div>
+
+      <!-- REDEEM CODES -->
+      <div class="page" id="page-codes">
+        <div class="toolbar" style="align-items:flex-end">
+          <div style="flex:1;max-width:360px">
+            <label class="form-label">Generate new codes</label>
+            <select class="filter" id="genPlan" style="width:120px">
+              <option value="1M">1 Month</option>
+              <option value="3M">3 Months</option>
+              <option value="LT">Lifetime</option>
             </select>
+            <input class="form-input" id="genQty" type="number" min="1" max="50" value="5" style="width:80px;display:inline-block;margin-left:8px">
+            <button class="btn btn-blue" style="margin-left:8px" onclick="generateCodes()">Generate</button>
           </div>
-          <div class="field" id="customPlanField" style="display:none;">
-            <label>Custom Plan Name</label>
-            <input type="text" id="gen-custom-plan" placeholder="e.g. Corporate 6M">
-          </div>
-          <div class="field">
-            <label>Expiry Duration</label>
-            <select id="gen-expiry">
-              <option value="1m">1 Month</option>
-              <option value="3m">3 Months</option>
-              <option value="lt">Lifetime / No expiry</option>
-              <option value="custom">Custom date...</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Note (optional)</label>
-            <input type="text" id="gen-note" placeholder="e.g. personal gift, bulk">
-          </div>
+          <button class="btn btn-ghost btn-sm" onclick="exportCodes()">⬇ Export CSV</button>
         </div>
-        <div class="field" id="customDateField" style="margin-top:14px;">
-          <label>Manual Expiry Date</label>
-          <input type="date" id="gen-date">
-          <div class="hint">Code will auto-expire at end of this date. Leave empty for no expiry.</div>
+        <div class="toolbar">
+          <div class="search-box"><span class="sico">🔍</span><input id="codeSearch" placeholder="Search code..." oninput="renderCodes()"></div>
+          <select class="filter" id="codeStatusFilter" onchange="renderCodes()">
+            <option value="">All statuses</option><option value="available">Available</option>
+            <option value="assigned">Assigned</option><option value="used">Used</option>
+            <option value="revoked">Revoked</option>
+          </select>
         </div>
-        <div style="margin-top:20px;">
-          <button class="btn btn-primary" id="generate-btn">Generate Code</button>
-        </div>
-        <div class="gen-result" id="gen-result">
-          <div>
-            <div class="gen-code" id="gen-code-display"></div>
-            <button class="btn btn-sm btn-ghost" id="copy-code-btn">Copy</button>
-          </div>
-          <div class="gen-meta" id="gen-meta"></div>
+        <div class="panel">
+          <div class="panel-hd"><h3>Redeem Codes</h3><span class="desc" id="codeCount"></span></div>
+          <div class="table-wrap"><table id="codesTable"></table></div>
         </div>
       </div>
-    </section>
 
-    <!-- ======== SUBSCRIPTIONS ======== -->
-    <section class="section" id="sec-subs">
-      <div class="sect-head">
-        <div><h2>Subscriptions</h2><div class="sub">Search, filter, and manage every issued code and purchase record.</div></div>
+      <!-- ANALYTICS -->
+      <div class="page" id="page-analytics">
+        <div class="stats" id="anaStats"></div>
+        <div class="chart-row">
+          <div class="panel">
+            <div class="panel-hd"><h3>Event Breakdown</h3></div>
+            <div class="panel-bd" id="eventBars"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hd"><h3>Recent Events</h3></div>
+            <div class="table-wrap"><table id="eventTable"></table></div>
+          </div>
+        </div>
       </div>
 
-      <div class="toolbar">
-        <div class="search"><input type="text" id="search-input" placeholder="Search name, phone, email, or code..."></div>
-        <select class="tool-select" id="status-filter">
-          <option value="">All statuses</option>
-          <option value="active">Active</option>
-          <option value="expired">Expired</option>
-          <option value="revoked">Revoked</option>
-          <option value="pending">Pending</option>
-        </select>
-        <select class="tool-select" id="plan-filter">
-          <option value="">All plans</option>
-          <option value="Starter">Starter</option>
-          <option value="Professional">Professional</option>
-          <option value="Lifetime">Lifetime</option>
-          <option value="Custom">Custom</option>
-        </select>
+      <!-- NEWSLETTER -->
+      <div class="page" id="page-newsletter">
+        <div class="toolbar">
+          <div class="search-box"><span class="sico">🔍</span><input id="newsSearch" placeholder="Search subscriber email..." oninput="renderNews()"></div>
+          <button class="btn btn-ghost btn-sm" onclick="exportNews()">⬇ Export CSV</button>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><h3>Newsletter Subscribers</h3><span class="desc" id="newsCount"></span></div>
+          <div class="table-wrap"><table id="newsTable"></table></div>
+        </div>
       </div>
 
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Code</th><th>Plan</th><th>Status</th><th>Buyer</th><th>Contact</th>
-              <th>Amount</th><th>Payment</th><th>Issued</th><th>Expires</th><th>Devices</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="subs-tbody">
-            <tr><td colspan="11"><div class="empty">Loading...</div></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="pager">
-        <button id="prev-page" disabled>&larr; Prev</button>
-        <span id="page-info"></span>
-        <button id="next-page" disabled>Next &rarr;</button>
-      </div>
-    </section>
-  </div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal-box">
-    <button class="modal-close" data-close>&times;</button>
-    <h3 id="edit-title">Edit Subscription</h3>
-    <div class="edit-grid">
-      <div class="field"><label>Buyer Name</label><input type="text" id="e-name"></div>
-      <div class="field"><label>Phone / WhatsApp</label><input type="text" id="e-phone"></div>
-      <div class="field"><label>Email</label><input type="email" id="e-email"></div>
-      <div class="field"><label>Amount Paid</label><input type="number" id="e-amount" step="0.01" min="0"></div>
-      <div class="field"><label>Expires At</label><input type="datetime-local" id="e-expires"></div>
-      <div class="field"><label>Notes</label><input type="text" id="e-notes"></div>
-    </div>
-    <div class="toggle-row">
-      <span class="lbl">Payment Verified</span>
-      <input type="checkbox" id="e-verified" style="width:20px;height:20px;accent-color:var(--success);">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-danger" id="e-revoke">Revoke Code</button>
-      <span style="flex:1"></span>
-      <button class="btn" data-close>Cancel</button>
-      <button class="btn btn-primary" id="e-save">Save</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- ================= MODAL ================= -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hd"><h3 id="modalTitle">Details</h3><button class="modal-x" onclick="closeModal()">×</button></div>
+    <div class="modal-bd" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://gvkcwtoryrzgbtufsgff.supabase.co';
 const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2a2N3dG9yeXJ6Z2J0dWZzZ2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTAxODYsImV4cCI6MjA5ODgyNjE4Nn0.LuHf8rs8LXgqGY8Av4AkSlMtN3m2gcMaMwrH2h4tnfE';
-const ADMIN_EMAIL = 'teamalumorg@gmail.com';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let adminUser = null;
+let adminProfile = null;
+let CACHE = { users:[], licenses:[], codes:[], events:[], news:[] };
 
-const authScreen = document.getElementById('auth-screen');
-const dashboard = document.getElementById('dashboard');
-const googleLoginBtn = document.getElementById('google-login-btn');
-const signoutBtn = document.getElementById('signout-btn');
-const adminEmailEl = document.getElementById('admin-email');
+const PRICES = { '1M':199, '3M':399, 'LT':999 };
+const PLAN_NAMES = { '1M':'1 Month', '3M':'3 Months', 'LT':'Lifetime' };
+const fmt = n => Number(n||0).toLocaleString('en-IN');
+const money = n => '₹' + fmt(n);
+const ago = d => {
+  if(!d) return '—';
+  const s = Math.floor((Date.now()-new Date(d))/1000);
+  if(s<60) return s+'s ago'; if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago'; if(s<2592000) return Math.floor(s/86400)+'d ago';
+  return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+};
+const dateFmt = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const badge = (status) => {
+  const map = {
+    active:'b-success', expired:'b-danger', revoked:'b-danger', pending:'b-warn',
+    available:'b-teal', assigned:'b-info', used:'b-purple',
+    admin:'b-purple', user:'b-navy', super_admin:'b-info'
+  };
+  return `<span class="badge ${map[status]||'b-neutral'}">${esc(status)}</span>`;
+};
+function toast(msg, type='ok'){
+  const t=document.createElement('div'); t.className='toast '+type;
+  t.innerHTML=`<span class="tdot"></span>${esc(msg)}`;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s';setTimeout(()=>t.remove(),300)},3500);
+}
+const showLoading = (el)=> el.innerHTML=`<div class="loading"><div class="spinner"></div>Loading...</div>`;
 
-let ALL = [];
-let currentPage = 0;
-const PAGE_SIZE = 25;
-let editingId = null;
-let range = 'week';
+/* ================= AUTH ================= */
+window.login = async function(){
+  const btn=document.getElementById('googleBtn');
+  btn.disabled=true; btn.textContent='Redirecting...';
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider:'google',
+    options:{ redirectTo: window.location.origin + '/admin.team' }
+  });
+  if(error){ document.getElementById('loginMsg').className='msg err'; document.getElementById('loginMsg').textContent=error.message; btn.disabled=false; btn.textContent='Continue with Google'; }
+};
 
-// ─── AUTH GATE ─────────────────────────────────────────────
-async function checkSession() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) { authScreen.style.display = 'flex'; dashboard.style.display = 'none'; return; }
-  if (user.email !== ADMIN_EMAIL) {
-    await supabase.auth.signOut();
-    authScreen.style.display = 'flex';
-    document.getElementById('denied-msg').style.display = 'block';
-    googleLoginBtn.disabled = true;
-    setTimeout(() => { window.location.replace('/'); }, 1800);
-    return;
+async function restoreSession(){
+  const { data } = await supabase.auth.getSession();
+  if(data?.session){
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.session.user.id).maybeSingle();
+    return { user:data.session.user, profile };
   }
-  authScreen.style.display = 'none';
-  dashboard.style.display = 'block';
-  adminEmailEl.textContent = user.email;
+  return null;
+}
+
+const ALLOWED_ADMIN_EMAILS = ['teamalumorg@gmail.com'];
+
+async function checkAccess(user, profile){
+  const email = (user.email || '').trim().toLowerCase();
+  if(!ALLOWED_ADMIN_EMAILS.includes(email)){
+    await supabase.auth.signOut();
+    return false;
+  }
+  const role = profile?.role || 'user';
+  if(!['admin','super_admin'].includes(role)){
+    await supabase.auth.signOut();
+    return false;
+  }
+  return true;
+}
+
+function showShell(user, profile){
+  adminUser=user; adminProfile=profile;
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('appShell').style.display='flex';
+  const initial = (profile?.full_name || user.email || 'A')[0].toUpperCase();
+  document.getElementById('sbAvatar').textContent=initial;
+  document.getElementById('sbName').textContent=profile?.full_name || 'Admin';
+  document.getElementById('sbEmail').textContent=user.email;
+  loadAll();
+}
+
+function hideShell(msg){
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('appShell').style.display='none';
+  if(msg) document.getElementById('loginMsg').className='msg err' , document.getElementById('loginMsg').textContent=msg;
+}
+
+window.logout = async function(){
+  await supabase.auth.signOut();
+  location.href=window.location.origin;
+};
+
+/* ================= NAV ================= */
+const PAGES = { dashboard:['Dashboard','Overview · Real-time metrics'], users:['Users','Manage accounts & roles'], licenses:['Licenses','Manage access & expiry'], codes:['Redeem Codes','Generate & manage codes'], analytics:['Analytics','Data analysis & events'], newsletter:['Newsletter','Subscriber management'] };
+window.go = function(page, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('pageTitle').textContent=PAGES[page][0];
+  document.getElementById('pageCrumb').textContent=PAGES[page][1];
+  const loadFn = { dashboard:loadDashboard, users:renderUsers, codes:renderCodes, analytics:loadAnalytics, newsletter:renderNews, licenses:renderLicenses }[page];
+  if(loadFn) loadFn();
+  window.scrollTo(0,0);
+};
+
+/* ================= DATA LOADING ================= */
+async function loadAll(){
+  document.getElementById('lastUpdated').textContent='Loading...';
+  const calls = await Promise.allSettled([
+    supabase.from('profiles').select('*').order('created_at',{ascending:false}).limit(1000),
+    supabase.from('licenses').select('*').order('created_at',{ascending:false}).limit(1000),
+    supabase.from('redeem_codes').select('*').order('created_at',{ascending:false}).limit(1000),
+    supabase.from('analytics_events').select('*').order('created_at',{ascending:false}).limit(1000),
+    supabase.from('newsletter_subscribers').select('*').order('subscribed_at',{ascending:false}).limit(1000),
+  ]);
+  const [u,l,c,e,n]=calls;
+  CACHE.users = u.status==='fulfilled'?u.value.data||[]:[];
+  CACHE.licenses = l.status==='fulfilled'?l.value.data||[]:[];
+  CACHE.codes = c.status==='fulfilled'?c.value.data||[]:[];
+  CACHE.events = e.status==='fulfilled'?e.value.data||[]:[];
+  CACHE.news = n.status==='fulfilled'?n.value.data||[]:[];
+  const now=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('lastUpdated').textContent='🔄 Updated '+now;
+  loadDashboard(); renderUsers(); renderLicenses(); renderCodes(); loadAnalytics(); renderNews();
+}
+
+window.refreshAll = async function(){
+  const btn=document.querySelector('.refresh-btn'); btn.textContent='↻ Syncing...'; btn.disabled=true;
   await loadAll();
+  btn.textContent='↻ Refresh'; btn.disabled=false;
+  toast('Data refreshed');
+};
+
+/* ================= DASHBOARD ================= */
+function loadDashboard(){
+  const users=CACHE.users, lic=CACHE.licenses, codes=CACHE.codes, events=CACHE.events;
+  const activeLic = lic.filter(x=>x.status==='active' && (!x.expires_at || new Date(x.expires_at)>Date.now()));
+  const expiredLic = lic.filter(x=>x.status==='expired' || (x.status==='active' && x.expires_at && new Date(x.expires_at)<=Date.now()));
+  const available = codes.filter(x=>x.status==='available').length;
+  const revenue = lic.filter(x=>x.status==='active').reduce((s,x)=>s+(PRICES[x.plan]||0),0);
+  const recentUsers = users.slice(0,6);
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat"><span class="accent ac-blue"></span><div class="lbl">Total Users</div><div class="val">${fmt(users.length)}</div><div class="sub">${fmt(users.filter(u=>u.role==='admin'||u.role==='super_admin').length)} admins</div></div>
+    <div class="stat"><span class="accent ac-green"></span><div class="lbl">Active Licenses</div><div class="val">${fmt(activeLic.length)}</div><div class="sub">${money(revenue)} est. revenue</div></div>
+    <div class="stat"><span class="accent ac-amber"></span><div class="lbl">Expired Licenses</div><div class="val">${fmt(expiredLic.length)}</div><div class="sub">${lic.length} total</div></div>
+    <div class="stat"><span class="accent ac-teal"></span><div class="lbl">Available Codes</div><div class="val">${fmt(available)}</div><div class="sub">${fmt(codes.length)} total codes</div></div>
+    <div class="stat"><span class="accent ac-purple"></span><div class="lbl">Tracked Events</div><div class="val">${fmt(events.length)}</div><div class="sub">analytics events</div></div>
+  `;
+
+  const planCount={}; lic.forEach(x=>{planCount[x.plan]=(planCount[x.plan]||0)+1;});
+  const maxCount=Math.max(1,...Object.values(planCount));
+  document.getElementById('planBars').innerHTML = Object.keys(PRICES).map(p=>{
+    const c=planCount[p]||0; const pct=Math.round((c/maxCount)*100);
+    return `<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${PLAN_NAMES[p]}</span><span>${fmt(c)} <span class="legend">licenses</span></span></div>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><div class="legend" style="margin-top:4px">₹${PRICES[p]} / license</div></div>`;
+  }).join('');
+
+  document.getElementById('priceKv').innerHTML = `
+    <div class="kv-list">
+      <div class="kv"><span class="k">Starter (1M)</span><span class="v">₹199</span></div>
+      <div class="kv"><span class="k">Professional (3M)</span><span class="v">₹399</span></div>
+      <div class="kv"><span class="k">Lifetime (LT)</span><span class="v">₹999</span></div>
+      <div class="kv"><span class="k">1M Active</span><span class="v">${fmt(planCount['1M']||0)}</span></div>
+      <div class="kv"><span class="k">3M Active</span><span class="v">${fmt(planCount['3M']||0)}</span></div>
+      <div class="kv"><span class="k">LT Active</span><span class="v">${fmt(planCount['LT']||0)}</span></div>
+    </div>`;
+
+  document.getElementById('recentUsersTable').innerHTML = recentUsers.length? `
+    <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+    <tbody>${recentUsers.map(u=>`<tr>
+      <td><span class="avatar-sm">${esc((u.full_name||u.email||'U')[0].toUpperCase())}</span>${esc(u.full_name||'—')}</td>
+      <td>${esc(u.email)}</td><td>${badge(u.role)}</td><td>${ago(u.created_at)}</td>
+    </tr>`).join('')}</tbody>` : `<tr><td class="empty" colspan="4"><div class="big">👥</div>No users yet</td></tr>`;
 }
 
-googleLoginBtn.addEventListener('click', async () => {
-  googleLoginBtn.disabled = true;
-  await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.origin + '/admin.html' }
-  });
-});
-signoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.reload(); });
-checkSession();
+/* ================= USERS ================= */
+window.renderUsers = function(){
+  const q=(document.getElementById('userSearch')?.value||'').toLowerCase();
+  const roleF=document.getElementById('userRoleFilter')?.value||'';
+  const list=CACHE.users.filter(u=>
+    (!q || (u.email||'').toLowerCase().includes(q) || (u.full_name||'').toLowerCase().includes(q)) &&
+    (!roleF || u.role===roleF));
+  document.getElementById('userCount').textContent=`${fmt(list.length)} of ${fmt(CACHE.users.length)} users`;
+  document.getElementById('usersTable').innerHTML = list.length? `
+    <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Licenses</th><th>Joined</th><th>Action</th></tr></thead>
+    <tbody>${list.map(u=>{
+      const lc=CACHE.licenses.filter(x=>x.user_id===u.id);
+      return `<tr>
+        <td><span class="avatar-sm">${esc((u.full_name||u.email||'U')[0].toUpperCase())}</span>${esc(u.full_name||'—')}</td>
+        <td>${esc(u.email)}</td><td>${badge(u.role)}</td>
+        <td><span class="badge ${lc.length?'b-info':'b-neutral'}">${lc.length}</span></td>
+        <td>${dateFmt(u.created_at)}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="showUser(${JSON.stringify(u.id)})">View</button></td>
+      </tr>`;}).join('')}</tbody>`
+    : `<tr><td class="empty" colspan="6"><div class="big">🔍</div>No users found</td></tr>`;
+};
 
-// ─── DATA ──────────────────────────────────────────────────
-async function loadAll() {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .order('date_issued', { ascending: false });
-  ALL = error ? [] : (data || []);
-  renderTable();
-  renderDashboard();
-}
+window.showUser = function(id){
+  const u=CACHE.users.find(x=>x.id===id); if(!u) return;
+  const lic=CACHE.licenses.filter(x=>x.user_id===id);
+  const prog=0;
+  document.getElementById('modalTitle').textContent='User Details';
+  document.getElementById('modalBody').innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div class="avatar-sm" style="width:52px;height:52px;font-size:20px">${esc((u.full_name||u.email||'U')[0].toUpperCase())}</div>
+      <div><div style="font-size:16px;font-weight:700;color:var(--navy)">${esc(u.full_name||'Unnamed')}</div>
+      <div style="color:var(--ink-soft);font-size:13px">${esc(u.email)}</div>
+      <div style="margin-top:4px">${badge(u.role)}</div></div>
+    </div>
+    <div class="row-detail"><span class="k">User ID</span><span class="v mono">${esc(u.id)}</span></div>
+    <div class="row-detail"><span class="k">Phone</span><span class="v">${esc(u.phone||'—')}</span></div>
+    <div class="row-detail"><span class="k">Joined</span><span class="v">${dateFmt(u.created_at)}</span></div>
+    <div class="row-detail"><span class="k">Licenses</span><span class="v">${lic.length}</span></div>
+    <div style="margin-top:14px;font-size:13px;font-weight:600;color:var(--ink-soft)">Licenses</div>
+    ${lic.length?`<div style="margin-top:8px">${lic.map(l=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px"><span class="mono">${esc(l.code)}</span><span>${badge(l.status)} ${esc(l.plan)}</span></div>`).join('')}</div>`:'<div class="legend" style="margin-top:6px">No licenses</div>'}
+  `;
+  document.getElementById('modalBg').classList.add('show');
+};
 
-// ─── STATS ─────────────────────────────────────────────────
-function computeStats() {
-  const s = { total: ALL.length, active: 0, expired: 0, revoked: 0, pending: 0, verified: 0, revenue: 0, byPlan: {} };
-  ALL.forEach(r => {
-    s[r.status] = (s[r.status] || 0) + 1;
-    const p = r.plan;
-    if (!s.byPlan[p]) s.byPlan[p] = { count: 0, revenue: 0 };
-    s.byPlan[p].count++;
-    if (r.payment_verified && r.amount_paid != null) {
-      s.revenue += Number(r.amount_paid);
-      s.verified++;
-      s.byPlan[p].revenue += Number(r.amount_paid);
-    }
+window.exportUsers = function(){
+  const rows=[['Name','Email','Role','Phone','Joined']];
+  CACHE.users.forEach(u=>rows.push([u.full_name||'',u.email||'',u.role||'',u.phone||'',u.created_at||'']));
+  downloadCSV(rows,'users');
+};
+
+/* ================= LICENSES ================= */
+window.renderLicenses = function(){
+  const q=(document.getElementById('licenseSearch')?.value||'').toLowerCase();
+  const stF=document.getElementById('licenseStatusFilter')?.value||'';
+  const emailOf={}; CACHE.users.forEach(u=>emailOf[u.id]=u.email);
+  const list=CACHE.licenses.filter(l=>{
+    const matchesEmail=(emailOf[l.user_id]||'').toLowerCase().includes(q);
+    return (!q || (l.code||'').toLowerCase().includes(q) || matchesEmail) && (!stF || l.status===stF);
   });
+  document.getElementById('licenseCount').textContent=`${fmt(list.length)} of ${fmt(CACHE.licenses.length)} licenses`;
+  document.getElementById('licensesTable').innerHTML = list.length? `
+    <thead><tr><th>Code</th><th>User</th><th>Plan</th><th>Status</th><th>Expires</th><th>Activated</th><th>Action</th></tr></thead>
+    <tbody>${list.map(l=>{
+      const expired = l.status==='active' && l.expires_at && new Date(l.expires_at)<=Date.now();
+      return `<tr>
+        <td class="mono">${esc(l.code)}</td>
+        <td>${esc(emailOf[l.user_id]||'—')}</td>
+        <td>${PLAN_NAMES[l.plan]||l.plan}</td>
+        <td>${badge(expired?'expired':l.status)}</td>
+        <td>${l.expires_at?dateFmt(l.expires_at)+' <span class="legend">· '+ago(l.expires_at)+'</span>':'<span class="legend">—</span>'}</td>
+        <td>${dateFmt(l.activated_at)}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="showLicense(${JSON.stringify(l.id)})">View</button></td>
+      </tr>`;}).join('')}</tbody>`
+    : `<tr><td class="empty" colspan="7"><div class="big">🔑</div>No licenses found</td></tr>`;
+};
+
+window.showLicense = function(id){
+  const l=CACHE.licenses.find(x=>x.id===id); if(!l) return;
+  const emailOf={}; CACHE.users.forEach(u=>emailOf[u.id]=u.email);
+  document.getElementById('modalTitle').textContent='License Details';
+  document.getElementById('modalBody').innerHTML=`
+    <div class="row-detail"><span class="k">Code</span><span class="v mono">${esc(l.code)}</span></div>
+    <div class="row-detail"><span class="k">Plan</span><span class="v">${PLAN_NAMES[l.plan]}</span></div>
+    <div class="row-detail"><span class="k">Status</span><span class="v">${badge(l.status)}</span></div>
+    <div class="row-detail"><span class="k">User</span><span class="v">${esc(emailOf[l.user_id]||'—')}</span></div>
+    <div class="row-detail"><span class="k">Purchased</span><span class="v">${dateFmt(l.purchased_at)}</span></div>
+    <div class="row-detail"><span class="k">Activated</span><span class="v">${dateFmt(l.activated_at)}</span></div>
+    <div class="row-detail"><span class="k">Expires</span><span class="v">${l.expires_at?dateFmt(l.expires_at)+' ('+ago(l.expires_at)+')':'Lifetime'}</span></div>
+    <div class="row-detail"><span class="k">Created</span><span class="v">${dateFmt(l.created_at)}</span></div>
+  `;
+  document.getElementById('modalBg').classList.add('show');
+};
+
+window.runExpiryCheck = async function(){
+  const { data, error } = await supabase.rpc('expire_licenses');
+  if(error){ toast('Expiry check failed: '+error.message,'err'); return; }
+  toast(`${data||0} license(s) marked expired`);
+  await loadAll();
+};
+
+/* ================= REDEEM CODES ================= */
+window.generateCodes = async function(){
+  const plan=document.getElementById('genPlan').value;
+  const qty=Math.min(50,Math.max(1,parseInt(document.getElementById('genQty').value)||5));
+  const codes=[];
+  for(let i=0;i<qty;i++) codes.push('TA-PE-'+plan+'-'+randCode());
+  const rows=codes.map(code=>({ code, plan, status:'available', created_by:adminUser.id }));
+  const { error } = await supabase.from('redeem_codes').insert(rows);
+  if(error){ toast('Error: '+error.message,'err'); return; }
+  toast(`${qty} ${PLAN_NAMES[plan]} code(s) generated`);
+  await loadAll();
+};
+
+function randCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s=''; for(let i=0;i<6;i++) s+=chars[Math.floor(Math.random()*chars.length)];
   return s;
 }
 
-function renderDashboard() {
-  const s = computeStats();
-  document.getElementById('st-total').textContent = s.total;
-  document.getElementById('st-revenue').textContent = '₹' + s.revenue.toLocaleString('en-IN');
-  document.getElementById('st-active').textContent = s.active || 0;
-  document.getElementById('st-expired').textContent = s.expired || 0;
-  document.getElementById('st-revoked').textContent = s.revoked || 0;
-  document.getElementById('st-verified').textContent = s.verified || 0;
-
-  const rows = document.getElementById('plan-rows');
-  const plans = Object.entries(s.byPlan).sort((a, b) => b[1].count - a[1].count);
-  if (!plans.length) { rows.innerHTML = '<tr><td colspan="3"><div class="empty">No data.</div></td></tr>'; return; }
-  rows.innerHTML = '';
-  plans.forEach(([p, v]) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-weight:600">${esc(p)}</td><td>${v.count}</td><td>₹${v.revenue.toLocaleString('en-IN')}</td>`;
-    rows.appendChild(tr);
+window.renderCodes = function(){
+  const q=(document.getElementById('codeSearch')?.value||'').toLowerCase();
+  const stF=document.getElementById('codeStatusFilter')?.value||'';
+  const emailOf={}; CACHE.users.forEach(u=>emailOf[u.id]=u.email);
+  const list=CACHE.codes.filter(c=>{
+    const matchesEmail=(emailOf[c.used_by]||c.assigned_to?emailOf[c.used_by]||emailOf[c.assigned_to]||'':'').toLowerCase().includes(q);
+    return (!q || (c.code||'').toLowerCase().includes(q) || matchesEmail) && (!stF || c.status===stF);
   });
-  renderChart();
+  document.getElementById('codeCount').textContent=`${fmt(list.length)} of ${fmt(CACHE.codes.length)} codes`;
+  document.getElementById('codesTable').innerHTML = list.length? `
+    <thead><tr><th>Code</th><th>Plan</th><th>Status</th><th>Used By</th><th>Expires</th><th>Created</th></tr></thead>
+    <tbody>${list.map(c=>`<tr>
+      <td class="mono">${esc(c.code)}</td>
+      <td>${PLAN_NAMES[c.plan]||c.plan}</td>
+      <td>${badge(c.status)}</td>
+      <td>${esc(emailOf[c.used_by]||emailOf[c.assigned_to]||'—')}</td>
+      <td>${c.expires_at?dateFmt(c.expires_at):'<span class="legend">Never</span>'}</td>
+      <td>${ago(c.created_at)}</td>
+    </tr>`).join('')}</tbody>`
+    : `<tr><td class="empty" colspan="6"><div class="big">🎟️</div>No codes found. Generate some above.</td></tr>`;
+};
+
+window.exportCodes = function(){
+  const rows=[['Code','Plan','Status','Created']];
+  CACHE.codes.forEach(c=>rows.push([c.code,c.plan,c.status,c.created_at||'']));
+  downloadCSV(rows,'redeem-codes');
+};
+
+/* ================= ANALYTICS ================= */
+function loadAnalytics(){
+  const ev=CACHE.events, lic=CACHE.licenses, users=CACHE.users;
+  const signupsLast30 = users.filter(u=>u.created_at && Date.now()-new Date(u.created_at) < 2592000000).length;
+  const activeLic = lic.filter(x=>x.status==='active' && (!x.expires_at||new Date(x.expires_at)>Date.now())).length;
+  const conversion = users.length?Math.round((activeLic/users.length)*1000)/10 : 0;
+  const revenue = lic.filter(x=>x.status==='active').reduce((s,x)=>s+(PRICES[x.plan]||0),0);
+
+  document.getElementById('anaStats').innerHTML = `
+    <div class="stat"><span class="accent ac-blue"></span><div class="lbl">Total Users</div><div class="val">${fmt(users.length)}</div></div>
+    <div class="stat"><span class="accent ac-green"></span><div class="lbl">New (30d)</div><div class="val">${fmt(signupsLast30)}</div><div class="sub">${users.length?Math.round(signupsLast30/users.length*100)+'% of total':''}</div></div>
+    <div class="stat"><span class="accent ac-purple"></span><div class="lbl">Conversion</div><div class="val">${conversion}<small>%</small></div><div class="sub">users with active license</div></div>
+    <div class="stat"><span class="accent ac-amber"></span><div class="lbl">Est. Revenue</div><div class="val">${money(revenue)}</div></div>
+  `;
+
+  const count={}; ev.forEach(e=>{count[e.event_name]=(count[e.event_name]||0)+1;});
+  const entries=Object.entries(count).sort((a,b)=>b[1]-a[1]);
+  const top=entries.slice(0,6); const max=Math.max(1,...top.map(t=>t[1]));
+  document.getElementById('eventBars').innerHTML = entries.length? top.map(([n,c],i)=>{
+    const pct=Math.round((c/max)*100);
+    const colors=['','teal','green','amber','purple'];
+    return `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${esc(n)}</span><span>${fmt(c)}</span></div>
+    <div class="bar-track"><div class="bar-fill ${colors[i%colors.length]}" style="width:${pct}%"></div></div></div>`;
+  }).join('') : `<div class="empty"><div class="big">📈</div>No events recorded yet</div>`;
+
+  document.getElementById('eventTable').innerHTML = ev.length? `
+    <thead><tr><th>Event</th><th>Page</th><th>Time</th></tr></thead>
+    <tbody>${ev.slice(0,10).map(e=>`<tr>
+      <td><span class="badge b-info">${esc(e.event_name)}</span></td>
+      <td style="font-size:12px">${esc(e.page_url||'—')}</td>
+      <td>${ago(e.created_at)}</td>
+    </tr>`).join('')}</tbody>`
+    : `<tr><td class="empty" colspan="3"><div class="big">📈</div>No events yet</td></tr>`;
 }
 
-// ─── TABLE ─────────────────────────────────────────────────
-function getFiltered() {
-  const q = document.getElementById('search-input').value.trim().toLowerCase();
-  const status = document.getElementById('status-filter').value;
-  const plan = document.getElementById('plan-filter').value;
-  return ALL.filter(r => {
-    if (status && r.status !== status) return false;
-    if (plan && r.plan !== plan) return false;
-    if (q) {
-      const hay = [r.code, r.buyer_name, r.buyer_phone, r.buyer_email].filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
+/* ================= NEWSLETTER ================= */
+window.renderNews = function(){
+  const q=(document.getElementById('newsSearch')?.value||'').toLowerCase();
+  const list=CACHE.news.filter(n=>(n.email||'').toLowerCase().includes(q));
+  const active=list.filter(n=>n.subscribed).length;
+  document.getElementById('newsCount').textContent=`${fmt(active)} subscribed of ${fmt(list.length)}`;
+  document.getElementById('newsTable').innerHTML = list.length? `
+    <thead><tr><th>Email</th><th>Subscribed</th><th>Date</th></tr></thead>
+    <tbody>${list.map(n=>`<tr>
+      <td>${esc(n.email)}</td><td>${badge(n.subscribed?'active':'revoked')} ${n.subscribed?'Active':'Unsubscribed'}</td>
+      <td>${dateFmt(n.subscribed_at)}</td>
+    </tr>`).join('')}</tbody>`
+    : `<tr><td class="empty" colspan="3"><div class="big">✉️</div>No subscribers yet</td></tr>`;
+};
+
+window.exportNews = function(){
+  const rows=[['Email','Subscribed','Date']];
+  CACHE.news.forEach(n=>rows.push([n.email,n.subscribed?'Yes':'No',n.subscribed_at||'']));
+  downloadCSV(rows,'newsletter-subscribers');
+};
+
+/* ================= UTIL ================= */
+function downloadCSV(rows, name){
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported '+name+'.csv');
 }
 
-function renderTable() {
-  const tbody = document.getElementById('subs-tbody');
-  const filtered = getFiltered();
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  if (currentPage >= totalPages) currentPage = totalPages - 1;
-  const start = currentPage * PAGE_SIZE;
-  const pageRows = filtered.slice(start, start + PAGE_SIZE);
+window.closeModal = function(){ document.getElementById('modalBg').classList.remove('show'); };
 
-  document.getElementById('page-info').textContent = filtered.length
-    ? `${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} of ${filtered.length}`
-    : '0 results';
-  document.getElementById('prev-page').disabled = currentPage === 0;
-  document.getElementById('next-page').disabled = currentPage >= totalPages - 1;
-
-  if (!pageRows.length) {
-    tbody.innerHTML = '<tr><td colspan="11"><div class="empty">' + (filtered.length ? 'Loading...' : 'No subscriptions match.') + '</div></td></tr>';
+/* ================= INIT ================= */
+(async function init(){
+  const session = await restoreSession();
+  if(!session){ updateLoginUI(); return; }
+  if(!await checkAccess(session.user, session.profile)){
+    hideShell('Access denied: only the authorized administrator email (teamalumorg@gmail.com) can access this panel.');
     return;
   }
-
-  tbody.innerHTML = '';
-  pageRows.forEach(r => {
-    const plan = r.plan === 'Custom' ? (r.custom_plan_name || 'Custom') : r.plan;
-    const contact = [r.buyer_phone, r.buyer_email].filter(Boolean).join(' / ') || '—';
-    const amount = r.amount_paid != null ? '₹' + Number(r.amount_paid).toLocaleString('en-IN', { minimumFractionDigits: r.amount_paid % 1 ? 2 : 0 }) : '—';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="t-code">${esc(r.code)}</td>
-      <td>${esc(plan)}</td>
-      <td><span class="pill ${r.status}">${esc(r.status)}</span></td>
-      <td>${esc(r.buyer_name || '—')}</td>
-      <td>${esc(contact)}</td>
-      <td>${amount}</td>
-      <td><span class="pill ${r.payment_verified ? 'yes' : 'no'}">${r.payment_verified ? 'Verified' : 'Pending'}</span></td>
-      <td>${fmtDate(r.date_issued)}</td>
-      <td>${r.expires_at ? fmtDate(r.expires_at) : '<span style="color:var(--ink-soft)">Lifetime</span>'}</td>
-      <td style="text-align:center">${r.device_count || 0}<span style="color:var(--ink-soft)">/3</span></td>
-      <td><div class="row-actions">
-        <button class="btn btn-sm" data-edit="${r.id}">Edit</button>
-        <button class="btn btn-sm btn-ghost" data-toggle-pay="${r.id}">${r.payment_verified ? 'Unverify' : 'Verify'}</button>
-      </div></td>`;
-    tbody.appendChild(tr);
+  showShell(session.user, session.profile);
+  window.addEventListener('hashchange', ()=>{
+    const page=new URLSearchParams(location.hash.replace('#','')).get('page') || 'dashboard';
+    if(PAGES[page]) go(page);
   });
+})();
 
-  tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openEdit(b.dataset.edit));
-  tbody.querySelectorAll('[data-toggle-pay]').forEach(b => b.onclick = () => togglePay(b.dataset.togglePay));
+function updateLoginUI(){
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('appShell').style.display='none';
 }
-
-async function togglePay(id) {
-  const rec = ALL.find(r => r.id === id);
-  if (!rec) return;
-  const next = !rec.payment_verified;
-  const { error } = await supabase.from('subscriptions').update({ payment_verified: next, payment_verified_at: next ? new Date().toISOString() : null }).eq('id', id);
-  if (error) { toast('Update failed'); return; }
-  toast(next ? 'Payment verified' : 'Payment unverified');
-  await loadAll();
-}
-
-// ─── EDIT MODAL ────────────────────────────────────────────
-function openEdit(id) {
-  const r = ALL.find(x => x.id === id);
-  if (!r) return;
-  editingId = id;
-  document.getElementById('e-name').value = r.buyer_name || '';
-  document.getElementById('e-phone').value = r.buyer_phone || '';
-  document.getElementById('e-email').value = r.buyer_email || '';
-  document.getElementById('e-amount').value = r.amount_paid != null ? r.amount_paid : '';
-  document.getElementById('e-expires').value = r.expires_at ? toLocalInput(r.expires_at) : '';
-  document.getElementById('e-notes').value = r.notes || '';
-  document.getElementById('e-verified').checked = !!r.payment_verified;
-  document.getElementById('e-revoke').style.display = r.status === 'revoked' ? 'none' : 'inline-flex';
-  document.getElementById('edit-title').textContent = `Edit — ${r.code}`;
-  document.getElementById('edit-modal').classList.add('show');
-}
-
-document.getElementById('e-save').addEventListener('click', async () => {
-  const payload = {
-    buyer_name: document.getElementById('e-name').value.trim() || null,
-    buyer_phone: document.getElementById('e-phone').value.trim() || null,
-    buyer_email: document.getElementById('e-email').value.trim() || null,
-    amount_paid: document.getElementById('e-amount').value !== '' ? Number(document.getElementById('e-amount').value) : null,
-    notes: document.getElementById('e-notes').value.trim() || null,
-    payment_verified: document.getElementById('e-verified').checked,
-    payment_verified_at: document.getElementById('e-verified').checked ? new Date().toISOString() : null,
-    expires_at: document.getElementById('e-expires').value ? new Date(document.getElementById('e-expires').value).toISOString() : null,
-  };
-  const { error } = await supabase.from('subscriptions').update(payload).eq('id', editingId);
-  if (error) { toast('Failed to save'); return; }
-  closeModal();
-  toast('Saved');
-  await loadAll();
-});
-
-document.getElementById('e-revoke').addEventListener('click', async () => {
-  if (!confirm('Revoke this code? Access will stop immediately.')) return;
-  const { error } = await supabase.from('subscriptions').update({ status: 'revoked' }).eq('id', editingId);
-  if (error) { toast('Failed to revoke'); return; }
-  closeModal();
-  toast('Code revoked');
-  await loadAll();
-});
-
-document.querySelectorAll('[data-close]').forEach(el => el.onclick = closeModal);
-function closeModal() { document.getElementById('edit-modal').classList.remove('show'); editingId = null; }
-
-// ─── GENERATE ──────────────────────────────────────────────
-document.getElementById('gen-plan').addEventListener('change', e => {
-  document.getElementById('customPlanField').style.display = e.target.value === 'Custom' ? 'block' : 'none';
-});
-document.getElementById('gen-expiry').addEventListener('change', e => {
-  document.getElementById('customDateField').classList.toggle('show', e.target.value === 'custom');
-});
-
-function genCode(plan) {
-  const prefix = plan === 'Starter' ? '1M' : plan === 'Professional' ? '3M' : 'LT';
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-  let s = '';
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return `TA-PE-${prefix}-${s}`;
-}
-
-document.getElementById('generate-btn').addEventListener('click', async () => {
-  const plan = document.getElementById('gen-plan').value;
-  const customPlan = document.getElementById('gen-custom-plan').value.trim();
-  const expirySel = document.getElementById('gen-expiry').value;
-  const note = document.getElementById('gen-note').value.trim();
-
-  let expiresAt = null;
-  const now = new Date();
-  if (expirySel === '1m') { const d = new Date(now); d.setMonth(d.getMonth() + 1); expiresAt = d.toISOString(); }
-  else if (expirySel === '3m') { const d = new Date(now); d.setMonth(d.getMonth() + 3); expiresAt = d.toISOString(); }
-  else if (expirySel === 'custom') { const v = document.getElementById('gen-date').value; if (v) expiresAt = new Date(v + 'T23:59:59').toISOString(); }
-
-  let code = genCode(plan);
-  for (let tries = 0; tries < 5; tries++) {
-    const { error } = await supabase.from('subscriptions').insert({
-      code, plan,
-      custom_plan_name: plan === 'Custom' ? (customPlan || null) : null,
-      status: 'active',
-      expires_at: expiresAt,
-      created_by: ADMIN_EMAIL,
-      notes: note || null,
-    });
-    if (!error) break;
-    code = genCode(plan);
-  }
-
-  const expiryLabel = expiresAt ? fmtDate(expiresAt) : 'No expiry (Lifetime)';
-  document.getElementById('gen-code-display').textContent = code;
-  document.getElementById('gen-meta').innerHTML = `<strong>${esc(plan)}</strong> &middot; expires <strong>${expiryLabel}</strong>${customPlan ? ' &middot; ' + esc(customPlan) : ''}`;
-  document.getElementById('gen-result').classList.add('show');
-  document.getElementById('copy-code-btn').onclick = () => { navigator.clipboard.writeText(code).then(() => toast('Code copied')); };
-  toast('Code generated');
-  await loadAll();
-});
-
-// ─── CHART (lightweight hand-rolled SVG) ───────────────────
-function toDay(d) { const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
-function toWeek(d) { const jan1 = new Date(d.getFullYear(), 0, 1); const wk = Math.ceil(((d - jan1) / 864e5 + jan1.getDay() + 1) / 7); return d.getFullYear() + '-W' + String(wk).padStart(2, '0'); }
-function toMonth(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
-
-const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-function labelFor(k) {
-  if (k.indexOf('-W') > -1) { const [y, w] = k.split('-W'); return 'W' + Number(w) + ' ' + y.slice(2); }
-  if (k.length === 7) return MONTH_SHORT[Number(k.split('-')[1]) - 1];
-  const [y, m, d] = k.split('-'); return Number(d) + ' ' + MONTH_SHORT[Number(m) - 1];
-}
-
-function renderChart() {
-  const box = document.getElementById('chart-box');
-  if (!ALL.length) { box.innerHTML = '<p class="empty">No data yet.</p>'; return; }
-  const now = new Date();
-
-  const countMap = {};
-  let max = 0;
-  ALL.forEach(r => {
-    const d = new Date(r.date_issued);
-    const k = range === 'day' ? toDay(d) : range === 'week' ? toWeek(d) : toMonth(d);
-    countMap[k] = (countMap[k] || 0) + 1;
-    if (countMap[k] > max) max = countMap[k];
-  });
-
-  const keys = Object.keys(countMap).sort();
-  const maxK = Math.max(1, max);
-  const nice = n => { if (n <= 3) return 3; const m = Math.pow(10, Math.floor(Math.log10(n))); const nm = n / m; const s = nm <= 1 ? 1 : nm <= 2 ? 2 : nm <= 2.5 ? 2.5 : nm <= 5 ? 5 : 10; return s * m; };
-  const yMax = nice(maxK);
-
-  const W = 760, H = 260, pL = 36, pR = 12, pT = 14, pB = 34;
-  const iw = W - pL - pR, ih = H - pT - pB;
-  const step = iw / Math.max(1, keys.length - 1);
-
-  let path = '', dots = '', grid = '', xlabels = '';
-  keys.forEach((k, i) => {
-    const x = pL + i * step;
-    const y = pT + ih - (countMap[k] / yMax) * ih;
-    path += (i ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
-    if (i % Math.ceil(keys.length / 8) === 0 || i === keys.length - 1) {
-      dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="var(--blue-bright)"><title>${labelFor(k)}: ${countMap[k]}</title></circle>`;
-      xlabels += `<text x="${x.toFixed(1)}" y="${H - 10}" text-anchor="middle" font-size="10" fill="var(--ink-soft)" font-family="Inter,sans-serif">${labelFor(k)}</text>`;
-    }
-  });
-  [0, 0.5, 1].forEach(f => {
-    const y = pT + ih * (1 - f);
-    grid += `<line x1="${pL}" y1="${y}" x2="${pL + iw}" y2="${y}" stroke="#eef2f8"/>`;
-    grid += `<text x="${pL - 8}" y="${y + 4}" text-anchor="end" font-size="10" fill="var(--ink-soft)" font-family="Inter,sans-serif">${Math.round(yMax * f)}</text>`;
-  });
-
-  const area = path + `L${pL + iw},${pT + ih} L${pL},${pT + ih} Z`;
-  box.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Subscriptions over time">
-      ${grid}${xlabels}
-      <path d="${area}" fill="rgba(47,123,245,.10)"/>
-      <path d="${path}" fill="none" stroke="var(--blue-bright)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      ${dots}
-    </svg>
-    <div class="chart-legend">
-      <span><span class="chart-dot" style="background:var(--blue-bright)"></span> New subscriptions (${range})</span>
-      <span>Latest: <strong>${countMap[keys[keys.length - 1]] || 0}</strong></span>
-    </div>`;
-}
-
-// ─── RANGE TABS ────────────────────────────────────────────
-document.querySelectorAll('#range-tabs .range-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('#range-tabs .range-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    range = tab.dataset.range;
-    renderChart();
-  });
-});
-
-// ─── MAIN TABS ─────────────────────────────────────────────
-document.querySelectorAll('#admin-tabs .tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('#admin-tabs .tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
-    if (tab.dataset.tab === 'dashboard') renderChart();
-  });
-});
-
-// ─── SEARCH / FILTER / PAGER ───────────────────────────────
-['input', 'change'].forEach(evt => {
-  document.getElementById('search-input').addEventListener(evt, () => { currentPage = 0; renderTable(); });
-  document.getElementById('status-filter').addEventListener(evt, () => { currentPage = 0; renderTable(); });
-  document.getElementById('plan-filter').addEventListener(evt, () => { currentPage = 0; renderTable(); });
-});
-document.getElementById('prev-page').addEventListener('click', () => { currentPage--; renderTable(); });
-document.getElementById('next-page').addEventListener('click', () => { currentPage++; renderTable(); });
-document.getElementById('refresh-btn').addEventListener('click', async () => { toast('Refreshing...'); await loadAll(); toast('Refreshed'); });
-
-// ─── HELPERS ───────────────────────────────────────────────
-function esc(str) { const d = document.createElement('div'); d.textContent = str == null ? '' : String(str); return d.innerHTML; }
-function fmtDate(iso) { if (!iso) return '—'; return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); }
-function toLocalInput(iso) { const d = new Date(iso); const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); }
-function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2500); }
 </script>
 </body>
 </html>
