@@ -1,291 +1,276 @@
 # Database Schema
 
-## Table: `profiles`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | References auth.users |
-| email | text | User email address |
-| full_name | text | User display name |
-| avatar_url | text | Profile picture URL |
-| role | text | 'user' or 'admin' |
-| created_at | timestamptz | Creation timestamp |
-| updated_at | timestamptz | Last update timestamp |
+Supabase project: `gvkcwtoryrzgbtufsgff`
 
-**Relationships:** `id` → `auth.users.id`
+Migrations live in `supabase/migrations/` and are applied in filename order. To apply
+them by hand:
 
-## Table: `books`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| title | text | Book title |
-| slug | text (unique) | URL-friendly identifier |
-| author | text | Author name |
-| description | text | Book description |
-| cover_url | text | Cover image URL |
-| is_published | boolean | Published status |
-| chapters_count | integer | Total chapters |
-| examples_count | integer | Code examples count |
-| templates_count | integer | Templates count |
-| what_you_learn | jsonb | Array of learning points |
-| prerequisites | jsonb | Array of prerequisites |
-| price_1m | integer | 1 month plan price |
-| price_3m | integer | 3 months plan price |
-| price_lt | integer | Lifetime plan price |
-| created_at | timestamptz | Creation timestamp |
-| updated_at | timestamptz | Last update timestamp |
+```bash
+npm run db:build     # concatenates them into supabase/APPLY_NOW.sql
+```
 
-**Relationships:** Referenced by `chapters.book_id`, `licenses.book_id`
+Then paste `supabase/APPLY_NOW.sql` into the Supabase SQL Editor. Every statement is
+idempotent.
 
-## Table: `chapters`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| book_id | uuid (FK) | References books.id |
-| title | text | Chapter title |
-| slug | text | URL-friendly identifier |
-| chapter_number | integer | Chapter ordering |
-| content | text | Full chapter content |
-| is_premium | boolean | Premium content flag |
-| est_read_time | integer | Estimated reading minutes |
-| created_at | timestamptz | Creation timestamp |
-| updated_at | timestamptz | Last update timestamp |
-
-**Relationships:** `book_id` → `books.id`, Referenced by `reading_progress.chapter_id`, `bookmarks.chapter_id`
-
-## Table: `licenses`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| user_id | uuid (FK) | References profiles.id |
-| book_id | uuid (FK) | References books.id |
-| plan_type | text | '1M', '3M', or 'LT' |
-| starts_at | timestamptz | License start |
-| expires_at | timestamptz | License expiry (null for LT) |
-| is_active | boolean | Active status |
-| created_at | timestamptz | Creation timestamp |
-
-**Relationships:** `user_id` → `profiles.id`, `book_id` → `books.id`
-
-## Table: `redeem_codes`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| code | text (unique) | Redemption code |
-| book_id | uuid (FK) | References books.id |
-| plan_type | text | '1M', '3M', or 'LT' |
-| is_used | boolean | Usage status |
-| used_by | uuid (FK) | References profiles.id |
-| used_at | timestamptz | Usage timestamp |
-| created_at | timestamptz | Creation timestamp |
-
-**Relationships:** `book_id` → `books.id`, `used_by` → `profiles.id`
-
-## Table: `reading_progress`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| user_id | uuid (FK) | References profiles.id |
-| book_id | uuid (FK) | References books.id |
-| chapter_id | uuid (FK) | References chapters.id |
-| progress | integer | Scroll percentage (0-100) |
-| last_position | text | Scroll position identifier |
-| completed_at | timestamptz | Completion timestamp |
-| created_at | timestamptz | Creation timestamp |
-| updated_at | timestamptz | Last update timestamp |
-
-**Relationships:** `user_id` → `profiles.id`, `book_id` → `books.id`, `chapter_id` → `chapters.id`
-
-## Table: `bookmarks`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| user_id | uuid (FK) | References profiles.id |
-| book_id | uuid (FK) | References books.id |
-| chapter_id | uuid (FK) | References chapters.id |
-| note | text | Optional bookmark note |
-| created_at | timestamptz | Creation timestamp |
-
-**Relationships:** `user_id` → `profiles.id`, `book_id` → `books.id`, `chapter_id` → `chapters.id`
-
-## Table: `newsletter_subscribers`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| email | text (unique) | Subscriber email |
-| is_active | boolean | Active subscription |
-| subscribed_at | timestamptz | Subscription timestamp |
-| unsubscribed_at | timestamptz | Unsubscription timestamp |
-
-## Table: `contact_messages`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| name | text | Sender name |
-| email | text | Sender email |
-| subject | text | Message subject |
-| message | text | Message body |
-| is_read | boolean | Read status |
-| created_at | timestamptz | Creation timestamp |
-
-## Table: `support_tickets`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| user_id | uuid (FK) | References profiles.id |
-| subject | text | Ticket subject |
-| description | text | Issue description |
-| status | text | 'open', 'in_progress', 'resolved', 'closed' |
-| priority | text | 'low', 'medium', 'high', 'critical' |
-| created_at | timestamptz | Creation timestamp |
-| updated_at | timestamptz | Last update timestamp |
-
-**Relationships:** `user_id` → `profiles.id`
-
-## Table: `audit_logs`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| user_id | uuid (FK) | References profiles.id |
-| action | text | Action performed |
-| resource | text | Resource affected |
-| resource_id | text | Resource identifier |
-| details | jsonb | Additional context |
-| ip_address | text | Request IP address |
-| created_at | timestamptz | Creation timestamp |
-
-**Relationships:** `user_id` → `profiles.id`
-
-## Table: `analytics_events`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| event_type | text | Event name |
-| user_id | uuid (FK) | References profiles.id (nullable) |
-| session_id | text | User session identifier |
-| page | text | Page path |
-| metadata | jsonb | Event payload |
-| created_at | timestamptz | Creation timestamp |
-
-**Relationships:** `user_id` → `profiles.id`
-
-## Table: `release_notes`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (PK) | Auto-generated |
-| version | text | Version identifier |
-| title | text | Release title |
-| description | text | Release description |
-| changes | jsonb | Array of change items |
-| is_published | boolean | Published status |
-| published_at | timestamptz | Publication timestamp |
-| created_at | timestamptz | Creation timestamp |
+| Migration | What it does |
+|-----------|--------------|
+| `20260101000000_initial.sql` | Baseline (bookmark) |
+| `20260102000000_followon.sql` | Baseline (bookmark) |
+| `20260906000000_bookstore_admin_subscriptions.sql` | `subscriptions`, `device_activations`, `is_admin()`, `validate_code()`, `request_purchase()` |
+| `20260906010000_fix_validate_code.sql` | Tightens `validate_code` |
+| `20260907000000_unify_license_content.sql` | **The big one** — entitlement model, `redeem_code()`, `get_chapters()`, content RLS, admin read policies, chapter two-row constraint |
 
 ---
 
-## Entity Relationship Diagram
+## The source of truth
+
+| Table | Role |
+|-------|------|
+| `subscriptions` | **The** licence ledger *and* the order queue. One table for both. |
+| `device_activations` | Which device is using which subscription (max 3) |
+
+`licenses` and `redeem_codes` are the **old** model. They are kept as a read-only archive
+and are visible in `/admin` → Archive. Do not write to them.
+
+---
+
+## Enums
+
+| Enum | Values |
+|------|--------|
+| `subscription_plan` | `Starter`, `Professional`, `Lifetime`, `Custom` |
+| `subscription_status` | `active`, `expired`, `revoked`, `pending` |
+| `license_plan` (legacy) | `1M`, `3M`, `LT` |
+| `chapter_status` | `draft`, `published`, `archived` |
+| `book_status` | `draft`, `published`, `archived` |
+| `user_role` | `user`, `admin`, `super_admin` |
+
+---
+
+## `subscriptions`
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid PK | `gen_random_uuid()` |
+| `code` | text unique | **NULL** for a purchase request until the admin issues one |
+| `plan` | `subscription_plan` | |
+| `custom_plan_name` | text | Only when `plan = 'Custom'` |
+| `status` | `subscription_status` | Default `pending` |
+| `created_at` | timestamptz | |
+| `expires_at` | timestamptz | `NULL` ⇒ lifetime |
+| `created_by` | text | Admin email, or `'public'` for a self-submitted request |
+| `buyer_name` | text | |
+| `buyer_phone` | text | |
+| `buyer_email` | text | Used to match the reader's JWT |
+| `amount_paid` | numeric(10,2) | INR |
+| `payment_verified` | boolean | Default `false` |
+| `payment_verified_at` | timestamptz | |
+| `date_issued` | timestamptz | Default `now()` |
+| `date_redeemed` | timestamptz | Set on first activation |
+| `device_count` | integer | Cached count of activations |
+| `notes` | text | |
+| `updated_at` | timestamptz | |
+| `user_id` | uuid → `auth.users.id` | Added by the unify migration; binds the licence to an account |
+| `book_slug` | text | Default `prompt-engineering-blueprint` |
+
+**Indexes:** `code` (unique), `status`, `plan`, `expires_at`, `date_issued`,
+`buyer_name`, `buyer_phone`, `lower(buyer_email)`, `user_id`.
+
+### Status flow
 
 ```
-┌──────────────┐       ┌──────────────┐
-│   profiles   │──┬───>│   licenses   │
-└──────┬───────┘  │    └──────┬───────┘
-       │          │           │
-       │          │    ┌──────┴───────┐
-       │          └───>│ redeem_codes │
-       │               └──────────────┘
-       │
-       │    ┌──────────────────┐
-       ├───>│ reading_progress │
-       │    └──────────────────┘
-       │
-       │    ┌─────────────┐
-       ├───>│  bookmarks  │
-       │    └─────────────┘
-       │
-       │    ┌──────────────────┐
-       ├───>│ support_tickets  │
-       │    └──────────────────┘
-       │
-       │    ┌───────────────┐
-       ├───>│  audit_logs   │
-       │    └───────────────┘
-       │
-       │    ┌──────────────────┐
-       └───>│ analytics_events │
-            └──────────────────┘
-
-┌───────────┐       ┌──────────────┐       ┌──────────────────┐
-│   books   │──┬───>│   chapters   │──┬───>│ reading_progress │
-└───────────┘  │    └──────────────┘  │    └──────────────────┘
-               │                      │
-               │                      │    ┌─────────────┐
-               │                      └───>│  bookmarks  │
-               │                           └─────────────┘
-               │
-               │    ┌──────────────┐
-               ├───>│   licenses   │
-               │    └──────────────┘
-               │
-               │    ┌──────────────┐
-               └───>│ redeem_codes │
-                    └──────────────┘
+        request_purchase()                admin issues code          admin revokes
+  ───────────────────────────►  pending  ──────────────────►  active  ──────────────►  revoked
+                                    │                          │
+                                    │                          └── expires_at passes ──► expired
+                                    │
+                                    └── (never redeemable while payment_verified = false)
 ```
 
 ---
 
-## Indexes
+## `device_activations`
 
-| Index Name | Table | Column(s) | Type |
-|------------|-------|-----------|------|
-| idx_books_slug | books | slug | UNIQUE |
-| idx_books_published | books | is_published | - |
-| idx_chapters_book | chapters | book_id, chapter_number | UNIQUE |
-| idx_licenses_user | licenses | user_id, book_id | - |
-| idx_licenses_active | licenses | user_id, is_active | - |
-| idx_redeem_codes_code | redeem_codes | code | UNIQUE |
-| idx_redeem_codes_used | redeem_codes | is_used | - |
-| idx_reading_progress_user | reading_progress | user_id, chapter_id | UNIQUE |
-| idx_bookmarks_user | bookmarks | user_id, chapter_id | UNIQUE |
-| idx_newsletter_email | newsletter_subscribers | email | UNIQUE |
-| idx_audit_logs_created | audit_logs | created_at | - |
-| idx_analytics_type | analytics_events | event_type, created_at | - |
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid PK | |
+| `subscription_id` | uuid → `subscriptions.id` | `on delete cascade` |
+| `device_id` | text | Stable browser fingerprint |
+| `device_label` | text | e.g. `"Win32 Chrome"` — shown in the admin panel |
+| `ip_address` | text | |
+| `user_agent` | text | |
+| `activated_at` | timestamptz | |
+
+Unique on `(subscription_id, device_id)`. The redeem flow enforces a **maximum of 3
+devices** per subscription.
 
 ---
 
-## Row Level Security (RLS) Policies
+## `books`
 
-| Table | Policy Name | Action | Description |
-|-------|-------------|--------|-------------|
-| profiles | users_read_own | SELECT | Users can read their own profile |
-| profiles | users_update_own | UPDATE | Users can update their own profile |
-| profiles | admin_all | ALL | Admins can manage all profiles |
-| books | published_read | SELECT | Anyone can read published books |
-| books | admin_all | ALL | Admins can manage books |
-| chapters | free_read | SELECT | Anyone can read free chapters |
-| chapters | premium_read | SELECT | Licensed users can read premium chapters |
-| chapters | admin_all | ALL | Admins can manage chapters |
-| licenses | user_read_own | SELECT | Users can read their own licenses |
-| licenses | admin_all | ALL | Admins can manage licenses |
-| redeem_codes | admin_all | ALL | Admins can manage redeem codes |
-| reading_progress | user_manage_own | ALL | Users can manage their own progress |
-| bookmarks | user_manage_own | ALL | Users can manage their own bookmarks |
-| newsletter_subscribers | insert_public | INSERT | Anyone can subscribe |
-| contact_messages | insert_public | INSERT | Anyone can submit messages |
-| contact_messages | admin_read | SELECT | Admins can read messages |
-| support_tickets | user_manage_own | ALL | Users can manage their own tickets |
-| support_tickets | admin_all | ALL | Admins can manage all tickets |
-| audit_logs | admin_read | SELECT | Admins can read audit logs |
-| analytics_events | insert_public | INSERT | Anyone can insert events |
-| analytics_events | admin_read | SELECT | Admins can read events |
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid PK | |
+| `title` | text | |
+| `slug` | text unique | `prompt-engineering-blueprint` |
+| `subtitle`, `description`, `cover_url` | text | |
+| `author`, `publisher`, `edition`, `version`, `isbn` | text | |
+| `chapters_count` | integer | |
+| `status` | `book_status` | Default `draft` |
+| `metadata` | jsonb | |
+| `created_at`, `updated_at` | timestamptz | |
+
+Seeded by the unify migration with the book published.
 
 ---
 
-## Triggers & Functions
+## `chapters` — two rows per chapter
 
-| Name | Type | Description |
-|------|------|-------------|
-| handle_new_user | TRIGGER | Creates profile on auth.users insert |
-| update_updated_at_column | FUNCTION | Auto-updates updated_at timestamp |
-| check_license_expiry | TRIGGER | Auto-deactivates expired licenses |
-| validate_redeem_code | FUNCTION | Validates code format and availability |
-| log_audit_event | FUNCTION | Logs admin actions to audit_logs |
-| increment_book_stats | FUNCTION | Updates chapters/examples/templates counts |
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid PK | |
+| `book_id` | uuid → `books.id` | `on delete cascade` |
+| `title` | text | |
+| `slug` | text | Unique per book |
+| `chapter_number` | integer | |
+| `content` | text | Full text — only readable by a licensed reader |
+| `preview_content` | text | The public teaser |
+| `is_premium` | boolean | `true` for the full row |
+| `is_free_preview` | boolean | **`true` = public row, `false` = paid row** |
+| `word_count`, `estimated_minutes` | integer | |
+| `status` | `chapter_status` | Only `published` rows are readable |
+| `metadata` | jsonb | |
+| `created_at`, `updated_at` | timestamptz | |
+
+### Why two rows?
+
+Postgres Row Level Security operates on **rows**, not columns. A single row holding both
+the teaser and the paid text would leak the whole text to anyone who can read the row.
+
+So a chapter is stored as:
+
+| Row | `is_free_preview` | Readable by |
+|-----|-------------------|-------------|
+| A | `true` | Everybody |
+| B | `false` | Only a reader with an active subscription |
+
+The baseline schema had `unique(book_id, chapter_number)`, which made this impossible.
+The unify migration drops that constraint and replaces it with:
+
+```sql
+create unique index idx_chapters_variant
+  on public.chapters (book_id, chapter_number, is_free_preview);
+```
+
+So a chapter has at most one preview row and at most one full row. `unique(book_id, slug)`
+stays — the two rows therefore need different slugs (the admin editor appends
+`-preview` / `-full` automatically when needed).
+
+`get_chapters()` returns one entry per chapter number, preferring the **full** row.
+
+---
+
+## Functions
+
+| Function | Returns | Volatility | Who can call it |
+|----------|---------|-----------|-----------------|
+| `is_admin()` | boolean | stable, `security invoker` | everyone (returns false without an admin JWT) |
+| `has_active_subscription()` | boolean | stable, `security definer` | anon, authenticated |
+| `owns_subscription(uuid)` | boolean | stable, `security definer` | anon, authenticated |
+| `redeem_code(text, text, text)` | jsonb | `security definer` | anon, authenticated |
+| `validate_code(text, text, text)` | jsonb | `security definer` | anon, authenticated (delegates to `redeem_code`) |
+| `get_chapters(text, text)` | jsonb | `security definer` | anon, authenticated |
+| `get_book_outline()` | jsonb | stable, `security definer` | anon, authenticated |
+| `request_purchase(text, numeric, text, text, text)` | uuid | `security definer` | anon, authenticated |
+| `expire_subscriptions()` | integer | `security definer` | **service_role only** (revoked from anon/authenticated) |
+
+---
+
+## Row Level Security
+
+RLS is enabled on every table.
+
+### `chapters` (the important ones)
+
+| Policy | Action | Rule |
+|--------|--------|------|
+| `chapters_public_preview` | SELECT | `status = 'published' and is_free_preview = true` |
+| `chapters_licensed_full` | SELECT | `status = 'published' and not is_free_preview and has_active_subscription()` |
+| `chapters_admin_all` | ALL | `is_admin()` |
+
+### `books`
+
+| Policy | Action | Rule |
+|--------|--------|------|
+| `books_public_published` | SELECT | `status = 'published'` |
+| `books_admin_all` | ALL | `is_admin()` |
+
+### `subscriptions`
+
+| Policy | Action | Rule |
+|--------|--------|------|
+| `admin can manage subscriptions` | ALL | `is_admin()` |
+| `Users can view own subscription` | SELECT | `owns_subscription(id)` |
+
+There is deliberately **no** public INSERT/UPDATE/DELETE policy. Public writes only
+happen through `request_purchase()`.
+
+### `device_activations`
+
+| Policy | Action | Rule |
+|--------|--------|------|
+| `admin access device activations` | ALL | `is_admin()` |
+| `Users can view own device activations` | SELECT | `owns_subscription(subscription_id)` |
+
+### Other tables
+
+| Table | Public read | Public write | Admin read |
+|-------|-------------|--------------|------------|
+| `profiles` | own row | own row | ✅ `is_admin()` |
+| `licenses` | — | — | ✅ `is_admin()` (archive) |
+| `redeem_codes` | — | — | ✅ `is_admin()` (archive) |
+| `reading_progress` | own | own | ✅ `is_admin()` |
+| `bookmarks` | own | own | ✅ `is_admin()` |
+| `newsletter_subscribers` | — | INSERT | ✅ `is_admin()` |
+| `contact_messages` | — | INSERT | ✅ `is_admin()` |
+| `support_tickets` | own | own | ✅ `is_admin()` |
+| `audit_logs` | — | — | ✅ `is_admin()` |
+| `analytics_events` | — | INSERT | ✅ `is_admin()` |
+
+The email-based admin policies were added because the original ones checked
+`profiles.role`, which only works if that row was seeded correctly. They are additive —
+the role-based policies remain.
+
+---
+
+## Legacy tables (archive)
+
+`licenses` and `redeem_codes` are the **first version** of the licence model. The old
+`chapters` RLS policy checked `licenses`, which the new redemption flow never wrote to —
+that is why a redeemed code used to unlock nothing. They are kept for reference only.
+
+---
+
+## Entity relationships
+
+```
+                 ┌──────────────────────┐
+                 │      subscriptions   │  ← source of truth
+                 │  code / plan / status │
+                 │  buyer_* / amount     │
+                 │  payment_verified     │
+                 └───┬──────────────┬───┘
+       user_id  ┌───┘              │  └────┐
+       (auth)   │                  │       │
+                ▼                  ▼       ▼
+   ┌────────────────────┐  ┌──────────────────────┐
+   │  device_activations │  │      profiles        │
+   │  max 3 per licence  │  │  mirror of auth.users │
+   └────────────────────┘  └──────────────────────┘
+
+   ┌──────────┐        ┌────────────────────────────┐
+   │  books   │───────>│          chapters          │
+   └──────────┘        │  row A: is_free_preview=true  (public)
+                       │  row B: is_free_preview=false (licensed)
+                       └────────────────────────────┘
+```

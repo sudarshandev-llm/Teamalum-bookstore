@@ -1,0 +1,18 @@
+# Development-only files that should not be part of the deployed site.
+#
+# Vercel serves the whole directory as a static site, so everything in
+# here would be publicly reachable. Keep the deployment to just the site.
+
+.github
+scripts
+supabase
+node_modules
+
+# Docs are in the repository, not on the site.
+*.md
+
+# Never ship secrets or local config.
+.env
+.env.*
+!.env.example
+.vercel

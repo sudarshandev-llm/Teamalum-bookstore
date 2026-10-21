@@ -1,5 +1,11 @@
 # Team Alum Bookstore — Database Schema (Admin / Subscriptions)
 
+> **Partially superseded.** This file documents only the `subscriptions` /
+> `device_activations` tables added by the
+> `20260906000000_bookstore_admin_subscriptions.sql` migration. The complete, current
+> schema — including the entitlement model, the two-rows-per-chapter content model and
+> all RLS policies — is in [Database Schema.md](./Database%20Schema.md).
+
 Live Supabase project: `gvkcwtoryrzgbtufsgff.supabase.co`
 
 The bookstore shares the same Supabase project as the main Team Alum site (per

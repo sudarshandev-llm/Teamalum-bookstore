@@ -180,8 +180,14 @@ tr:hover td{background:#fafcff;}
   <div class="wrap">
     <div class="tabs" id="admin-tabs">
       <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="requests">Purchase Requests</button>
       <button class="tab" data-tab="generate">Generate Code</button>
       <button class="tab" data-tab="subscriptions">Subscriptions</button>
+      <button class="tab" data-tab="devices">Devices</button>
+      <button class="tab" data-tab="content">Content</button>
+      <button class="tab" data-tab="users">Users</button>
+      <button class="tab" data-tab="news">Newsletter</button>
+      <button class="tab" data-tab="archive">Archive</button>
     </div>
 
     <!-- ======== DASHBOARD ======== -->
@@ -193,6 +199,7 @@ tr:hover td{background:#fafcff;}
 
       <div class="stats-grid">
         <div class="stat-card"><span class="lbl">Total Subscriptions</span><div class="val" id="st-total">&mdash;</div><div class="hint">All-time issued</div></div>
+        <div class="stat-card amber" id="st-pending-card" style="cursor:pointer;" title="Show pending purchase requests"><span class="lbl">Pending Requests</span><div class="val" id="st-pending">&mdash;</div><div class="hint">Awaiting a code</div></div>
         <div class="stat-card accent"><span class="lbl">Total Revenue</span><div class="val" id="st-revenue">&mdash;</div><div class="hint">Verified payments</div></div>
         <div class="stat-card"><span class="lbl">Active</span><div class="val" id="st-active">&mdash;</div><div class="hint">Currently valid</div></div>
         <div class="stat-card amber"><span class="lbl">Expired</span><div class="val" id="st-expired">&mdash;</div><div class="hint">Past expiry date</div></div>
@@ -276,7 +283,7 @@ tr:hover td{background:#fafcff;}
     </section>
 
     <!-- ======== SUBSCRIPTIONS ======== -->
-    <section class="section" id="sec-subs">
+    <section class="section" id="sec-subscriptions">
       <div class="sect-head">
         <div><h2>Subscriptions</h2><div class="sub">Search, filter, and manage every issued code and purchase record.</div></div>
       </div>
@@ -321,10 +328,137 @@ tr:hover td{background:#fafcff;}
         <button id="next-page" disabled>Next &rarr;</button>
       </div>
     </section>
+    <!-- ======== PURCHASE REQUESTS ======== -->
+    <section class="section" id="sec-requests">
+      <div class="sect-head">
+        <div><h2>Purchase Requests</h2><div class="sub">People who asked to buy via WhatsApp. Issue a license code to one of them below.</div></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <p class="sub" style="margin:0;">
+          A request becomes a license when you tap <b>Issue Code</b>, confirm the payment and set an expiry.
+          Until then the buyer has no code and cannot read the paid chapters.
+        </p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Requested</th><th>Plan</th><th>Amount</th><th>Buyer</th><th>Contact</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="req-tbody">
+            <tr><td colspan="7"><div class="empty">Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======== DEVICES ======== -->
+    <section class="section" id="sec-devices">
+      <div class="sect-head">
+        <div><h2>Activated Devices</h2><div class="sub">Every device that has redeemed a code. Licenses are limited to 3 devices.</div></div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Code</th><th>Plan</th><th>Device</th><th>Label</th><th>Activated</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="dev-tbody">
+            <tr><td colspan="6"><div class="empty">Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======== CONTENT ======== -->
+    <section class="section" id="sec-content">
+      <div class="sect-head">
+        <div><h2>Book Content</h2><div class="sub">Publish the chapters that licensed readers can open.</div></div>
+        <button class="btn btn-primary" id="ch-new-btn">+ New Chapter</button>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <p class="sub" style="margin:0;">
+          Each chapter is stored as <b>two rows</b> so the database can keep the free preview separate from the paid text:
+          a <b>Preview</b> row (<code>is_free_preview = true</code>) that anybody may read, and a <b>Full</b> row
+          (<code>is_free_preview = false</code>) that only a reader with an active license can read.
+          Add the preview row first, then the full row for the same chapter number.
+        </p>
+      </div>
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start;" id="ch-layout">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:12px 14px;border-bottom:1px solid var(--line);font-weight:600;font-size:13px;">Chapters</div>
+          <div id="ch-list" style="max-height:560px;overflow-y:auto;"><div class="empty" style="padding:14px;">Loading...</div></div>
+        </div>
+        <div class="card" id="ch-editor">
+          <div class="empty">Select a chapter on the left, or create a new one.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== USERS ======== -->
+    <section class="section" id="sec-users">
+      <div class="sect-head">
+        <div><h2>Users</h2><div class="sub">Accounts that signed in with Google.</div></div>
+      </div>
+      <div class="toolbar">
+        <div class="search"><input type="text" id="user-search" placeholder="Search name or email..."></div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+          <tbody id="users-tbody"><tr><td colspan="4"><div class="empty">Loading...</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======== NEWSLETTER ======== -->
+    <section class="section" id="sec-news">
+      <div class="sect-head">
+        <div><h2>Newsletter</h2><div class="sub">People who asked to be notified about new chapters.</div></div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Email</th><th>Name</th><th>Subscribed</th></tr></thead>
+          <tbody id="news-tbody"><tr><td colspan="3"><div class="empty">Loading...</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+    <!-- ======== ARCHIVE (legacy tables) ======== -->
+    <section class="section" id="sec-archive">
+      <div class="sect-head">
+        <div><h2>Archive</h2><div class="sub">Records from the first version of the storefront, kept for reference. New licenses all live in Subscriptions.</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+        <div>
+          <h3 style="font-size:14px;margin:0 0 10px;">Legacy licenses</h3>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Code</th><th>Plan</th><th>Status</th><th>Expires</th></tr></thead>
+              <tbody id="lic-tbody"><tr><td colspan="4"><div class="empty">Loading...</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:14px;margin:0 0 10px;">Legacy redeem codes</h3>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Code</th><th>Plan</th><th>Status</th><th>Used by</th></tr></thead>
+              <tbody id="rc-tbody"><tr><td colspan="4"><div class="empty">Loading...</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:14px;margin:0 0 10px;">Site analytics events</h3>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Event</th><th>Session</th><th>When</th></tr></thead>
+              <tbody id="ev-tbody"><tr><td colspan="3"><div class="empty">Loading...</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </div>
 
-<!-- Edit Modal -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal-box">
     <button class="modal-close" data-close>&times;</button>
@@ -350,6 +484,55 @@ tr:hover td{background:#fafcff;}
   </div>
 </div>
 
+<!-- ISSUE CODE FROM A PURCHASE REQUEST -->
+<div class="modal-overlay" id="issue-modal">
+  <div class="modal-box">
+    <button class="modal-close" data-issue-close>&times;</button>
+    <h3 id="issue-title">Issue License Code</h3>
+    <p class="hint" style="margin:-6px 0 16px;">
+      Confirm the WhatsApp payment, then issue a code. The buyer redeems it on the site and the
+      paid chapters unlock immediately.
+    </p>
+    <div class="edit-grid">
+      <div class="field"><label>Buyer Name</label><input type="text" id="i-name"></div>
+      <div class="field"><label>Phone / WhatsApp</label><input type="text" id="i-phone"></div>
+      <div class="field"><label>Email</label><input type="email" id="i-email"></div>
+      <div class="field"><label>Plan</label>
+        <select id="i-plan">
+          <option value="Starter">Starter — 1 month</option>
+          <option value="Professional">Professional — 3 months</option>
+          <option value="Lifetime">Lifetime</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+      <div class="field"><label>Custom plan name</label><input type="text" id="i-custom-plan" placeholder="only for Custom"></div>
+      <div class="field"><label>Amount Paid (₹)</label><input type="number" id="i-amount" step="0.01" min="0"></div>
+      <div class="field"><label>Valid for</label>
+        <select id="i-expiry">
+          <option value="1m">1 month</option>
+          <option value="3m">3 months</option>
+          <option value="lt">Lifetime (no expiry)</option>
+          <option value="custom">Custom date…</option>
+        </select>
+      </div>
+      <div class="field"><label>Expires At</label><input type="datetime-local" id="i-date"></div>
+      <div class="field"><label>Notes</label><input type="text" id="i-notes"></div>
+    </div>
+    <div class="toggle-row">
+      <span class="lbl">Payment received &amp; verified</span>
+      <input type="checkbox" id="i-verified" checked style="width:20px;height:20px;accent-color:var(--success);">
+    </div>
+    <p class="hint" style="margin:10px 0 0;">
+      Untick only if the payment has not arrived yet — an unverified request cannot be redeemed.
+    </p>
+    <div class="modal-actions">
+      <span style="flex:1"></span>
+      <button class="btn" data-issue-close>Cancel</button>
+      <button class="btn btn-primary" id="i-issue">Issue Code</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -368,9 +551,18 @@ const signoutBtn = document.getElementById('signout-btn');
 const adminEmailEl = document.getElementById('admin-email');
 
 let ALL = [];
+let DEVICES = [];
+let CHAPTERS = [];
+let BOOKS = [];
+let USERS = [];
+let NEWS = [];
+let LEGACY_LICENSES = [];
+let LEGACY_CODES = [];
+let EVENTS = [];
 let currentPage = 0;
 const PAGE_SIZE = 25;
 let editingId = null;
+let issuingId = null;
 let range = 'week';
 
 // ─── AUTH GATE ─────────────────────────────────────────────
@@ -402,13 +594,78 @@ checkSession();
 
 // ─── DATA ──────────────────────────────────────────────────
 async function loadAll() {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .order('date_issued', { ascending: false });
-  ALL = error ? [] : (data || []);
+  const [subs, devs, chaps, bks, users, news, lics, rcs, evs] = await Promise.all([
+    supabase.from('subscriptions').select('*').order('date_issued', { ascending: false }),
+    supabase.from('device_activations').select('*').order('activated_at', { ascending: false }),
+    supabase.from('chapters').select('*').order('chapter_number', { ascending: true }),
+    supabase.from('books').select('*'),
+    supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(500),
+    supabase.from('newsletter_subscribers').select('*').order('subscribed_at', { ascending: false }).limit(500),
+    supabase.from('licenses').select('*').order('created_at', { ascending: false }).limit(200),
+    supabase.from('redeem_codes').select('*').order('created_at', { ascending: false }).limit(200),
+    supabase.from('analytics_events').select('*').order('created_at', { ascending: false }).limit(200),
+  ]);
+  ALL      = subs.error ? [] : (subs.data || []);
+  DEVICES  = devs.error ? [] : (devs.data || []);
+  CHAPTERS = chaps.error ? [] : (chaps.data || []);
+  BOOKS    = bks.error ? [] : (bks.data || []);
+  USERS    = users.error ? [] : (users.data || []);
+  NEWS     = news.error ? [] : (news.data || []);
+  LEGACY_LICENSES = lics.error ? [] : (lics.data || []);
+  LEGACY_CODES    = rcs.error ? [] : (rcs.data || []);
+  EVENTS          = evs.error ? [] : (evs.data || []);
   renderTable();
   renderDashboard();
+  renderRequests();
+  renderDevices();
+  renderChapterList();
+  renderUsers();
+  renderNews();
+  renderArchive();
+}
+
+function renderArchive() {
+  const licBody = document.getElementById('lic-tbody');
+  const rcBody  = document.getElementById('rc-tbody');
+  if (licBody) {
+    if (!LEGACY_LICENSES.length) {
+      licBody.innerHTML = '<tr><td colspan="4"><div class="empty">No legacy licenses.</div></td></tr>';
+    } else {
+      licBody.innerHTML = LEGACY_LICENSES.map(l => `
+        <tr>
+          <td class="t-code">${esc(l.code || '—')}</td>
+          <td>${esc(l.plan || '—')}</td>
+          <td><span class="pill ${esc(l.status || '')}">${esc(l.status || '—')}</span></td>
+          <td>${fmtDate(l.expires_at)}</td>
+        </tr>`).join('');
+    }
+  }
+  if (rcBody) {
+    if (!LEGACY_CODES.length) {
+      rcBody.innerHTML = '<tr><td colspan="4"><div class="empty">No legacy redeem codes.</div></td></tr>';
+    } else {
+      rcBody.innerHTML = LEGACY_CODES.map(c => `
+        <tr>
+          <td class="t-code">${esc(c.code || '—')}</td>
+          <td>${esc(c.plan || '—')}</td>
+          <td><span class="pill ${esc(c.status || '')}">${esc(c.status || '—')}</span></td>
+          <td>${esc(c.used_by || '—')}</td>
+        </tr>`).join('');
+    }
+  }
+  const evBody = document.getElementById('ev-tbody');
+  if (evBody) {
+    if (!EVENTS.length) {
+      evBody.innerHTML = '<tr><td colspan="3"><div class="empty">No analytics events recorded.</div></td></tr>';
+    } else {
+      evBody.innerHTML = EVENTS.map(e => `
+        <tr>
+          <td>${esc(e.event_name || '—')}</td>
+          <td style="font-family:var(--mono);font-size:11px;">${esc((e.session_id || '').slice(0, 12))}</td>
+          <td>${fmtDate(e.created_at)}</td>
+        </tr>`).join('');
+    }
+  }
 }
 
 // ─── STATS ─────────────────────────────────────────────────
@@ -431,6 +688,7 @@ function computeStats() {
 function renderDashboard() {
   const s = computeStats();
   document.getElementById('st-total').textContent = s.total;
+  document.getElementById('st-pending').textContent = s.pending || 0;
   document.getElementById('st-revenue').textContent = '₹' + s.revenue.toLocaleString('en-IN');
   document.getElementById('st-active').textContent = s.active || 0;
   document.getElementById('st-expired').textContent = s.expired || 0;
@@ -579,6 +837,91 @@ document.getElementById('e-revoke').addEventListener('click', async () => {
 document.querySelectorAll('[data-close]').forEach(el => el.onclick = closeModal);
 function closeModal() { document.getElementById('edit-modal').classList.remove('show'); editingId = null; }
 
+// ─── ISSUE CODE FROM A PURCHASE REQUEST ────────────────────
+function closeIssueModal() {
+  document.getElementById('issue-modal').classList.remove('show');
+  issuingId = null;
+}
+document.querySelectorAll('[data-issue-close]').forEach(el => el.onclick = closeIssueModal);
+
+function openIssue(id) {
+  const r = ALL.find(x => x.id === id);
+  if (!r) return;
+  issuingId = id;
+  document.getElementById('issue-title').textContent =
+    'Issue License Code' + (r.buyer_email ? ' — ' + r.buyer_email : '');
+  document.getElementById('i-name').value = r.buyer_name || '';
+  document.getElementById('i-phone').value = r.buyer_phone || '';
+  document.getElementById('i-email').value = r.buyer_email || '';
+  document.getElementById('i-plan').value = ['Starter', 'Professional', 'Lifetime', 'Custom'].includes(r.plan) ? r.plan : 'Starter';
+  document.getElementById('i-custom-plan').value = r.custom_plan_name || '';
+  document.getElementById('i-amount').value = r.amount_paid != null ? r.amount_paid : '';
+  document.getElementById('i-notes').value = r.notes || '';
+  document.getElementById('i-verified').checked = true;
+  // Suggest an expiry that matches the plan the buyer asked for.
+  const plan = document.getElementById('i-plan').value;
+  document.getElementById('i-expiry').value = plan === 'Starter' ? '1m' : plan === 'Professional' ? '3m' : 'lt';
+  document.getElementById('i-date').value = '';
+  document.getElementById('issue-modal').classList.add('show');
+}
+
+document.getElementById('i-plan').addEventListener('change', e => {
+  const plan = e.target.value;
+  document.getElementById('i-expiry').value = plan === 'Starter' ? '1m' : plan === 'Professional' ? '3m' : 'lt';
+});
+
+document.getElementById('i-issue').addEventListener('click', async () => {
+  if (!issuingId) return;
+  const btn = document.getElementById('i-issue');
+  btn.disabled = true;
+
+  const plan = document.getElementById('i-plan').value;
+  const expirySel = document.getElementById('i-expiry').value;
+  const verified = document.getElementById('i-verified').checked;
+
+  let expiresAt = null;
+  const now = new Date();
+  if (expirySel === '1m') { const d = new Date(now); d.setMonth(d.getMonth() + 1); expiresAt = d.toISOString(); }
+  else if (expirySel === '3m') { const d = new Date(now); d.setMonth(d.getMonth() + 3); expiresAt = d.toISOString(); }
+  else if (expirySel === 'custom') {
+    const v = document.getElementById('i-date').value;
+    if (!v) { toast('Pick an expiry date or choose another option'); btn.disabled = false; return; }
+    expiresAt = new Date(v + 'T23:59:59').toISOString();
+  }
+
+  const code = await uniqueCode(plan);
+  const payload = {
+    code,
+    plan,
+    custom_plan_name: plan === 'Custom' ? (document.getElementById('i-custom-plan').value.trim() || null) : null,
+    status: 'active',
+    expires_at: expiresAt,
+    buyer_name: document.getElementById('i-name').value.trim() || null,
+    buyer_phone: document.getElementById('i-phone').value.trim() || null,
+    buyer_email: document.getElementById('i-email').value.trim() || null,
+    amount_paid: Number(document.getElementById('i-amount').value) || 0,
+    notes: document.getElementById('i-notes').value.trim() || null,
+    payment_verified: verified,
+    payment_verified_at: verified ? new Date().toISOString() : null,
+    created_by: ADMIN_EMAIL,
+  };
+
+  const { error } = await supabase.from('subscriptions').update(payload).eq('id', issuingId);
+  btn.disabled = false;
+  if (error) { toast('Could not issue code: ' + error.message); return; }
+
+  closeIssueModal();
+  toast('Code issued: ' + code);
+  await loadAll();
+  // Show the code so it can be copied and sent to the buyer.
+  document.getElementById('gen-code-display').textContent = code;
+  document.getElementById('gen-meta').innerHTML =
+    `<strong>${esc(plan)}</strong> &middot; expires <strong>${expiresAt ? fmtDate(expiresAt) : 'No expiry (Lifetime)'}</strong>` +
+    (payload.buyer_email ? ` &middot; ${esc(payload.buyer_email)}` : '');
+  document.getElementById('gen-result').classList.add('show');
+  document.getElementById('copy-code-btn').onclick = () => { navigator.clipboard.writeText(code).then(() => toast('Code copied')); };
+});
+
 // ─── GENERATE ──────────────────────────────────────────────
 document.getElementById('gen-plan').addEventListener('change', e => {
   document.getElementById('customPlanField').style.display = e.target.value === 'Custom' ? 'block' : 'none';
@@ -587,12 +930,26 @@ document.getElementById('gen-expiry').addEventListener('change', e => {
   document.getElementById('customDateField').classList.toggle('show', e.target.value === 'custom');
 });
 
+// Plan -> code prefix. Custom plans get their own prefix instead of
+// masquerading as a Lifetime code.
+const PLAN_PREFIX = { Starter: '1M', Professional: '3M', Lifetime: 'LT', Custom: 'CUS' };
+
 function genCode(plan) {
-  const prefix = plan === 'Starter' ? '1M' : plan === 'Professional' ? '3M' : 'LT';
+  const prefix = PLAN_PREFIX[plan] || 'CUS';
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   let s = '';
   for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
   return `TA-PE-${prefix}-${s}`;
+}
+
+/* Unique code — retries a few times if the database already has it. */
+async function uniqueCode(plan) {
+  for (let tries = 0; tries < 8; tries++) {
+    const code = genCode(plan);
+    const { data } = await supabase.from('subscriptions').select('id').eq('code', code).maybeSingle();
+    if (!data) return code;
+  }
+  return genCode(plan) + 'X';
 }
 
 document.getElementById('generate-btn').addEventListener('click', async () => {
@@ -607,19 +964,21 @@ document.getElementById('generate-btn').addEventListener('click', async () => {
   else if (expirySel === '3m') { const d = new Date(now); d.setMonth(d.getMonth() + 3); expiresAt = d.toISOString(); }
   else if (expirySel === 'custom') { const v = document.getElementById('gen-date').value; if (v) expiresAt = new Date(v + 'T23:59:59').toISOString(); }
 
-  let code = genCode(plan);
-  for (let tries = 0; tries < 5; tries++) {
-    const { error } = await supabase.from('subscriptions').insert({
-      code, plan,
-      custom_plan_name: plan === 'Custom' ? (customPlan || null) : null,
-      status: 'active',
-      expires_at: expiresAt,
-      created_by: ADMIN_EMAIL,
-      notes: note || null,
-    });
-    if (!error) break;
-    code = genCode(plan);
-  }
+  const code = await uniqueCode(plan);
+  const { error } = await supabase.from('subscriptions').insert({
+    code, plan,
+    custom_plan_name: plan === 'Custom' ? (customPlan || null) : null,
+    status: 'active',
+    expires_at: expiresAt,
+    created_by: ADMIN_EMAIL,
+    notes: note || null,
+    // A code issued by the admin is released only after the payment
+    // has been confirmed on WhatsApp.
+    payment_verified: true,
+    payment_verified_at: new Date().toISOString(),
+    date_issued: new Date().toISOString(),
+  });
+  if (error) { toast('Could not create code: ' + error.message); return; }
 
   const expiryLabel = expiresAt ? fmtDate(expiresAt) : 'No expiry (Lifetime)';
   document.getElementById('gen-code-display').textContent = code;
@@ -706,15 +1065,306 @@ document.querySelectorAll('#range-tabs .range-tab').forEach(tab => {
   });
 });
 
+// ─── PURCHASE REQUESTS ─────────────────────────────────────
+function requestsList() {
+  // A request is a subscription row that has no code yet.
+  return ALL.filter(r => !r.code);
+}
+
+function renderRequests() {
+  const tbody = document.getElementById('req-tbody');
+  if (!tbody) return;
+  const rows = requestsList();
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty">No open purchase requests. New WhatsApp requests land here automatically.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const contact = [r.buyer_phone, r.buyer_email].filter(Boolean).join(' / ') || '—';
+    const amount = r.amount_paid != null ? '₹' + Number(r.amount_paid).toLocaleString('en-IN') : '—';
+    const plan = r.plan === 'Custom' ? (r.custom_plan_name || 'Custom') : r.plan;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${fmtDate(r.date_issued)}</td>
+      <td>${esc(plan)}</td>
+      <td>${amount}</td>
+      <td>${esc(r.buyer_name || '—')}</td>
+      <td>${esc(contact)}</td>
+      <td><span class="pill ${r.status}">${esc(r.status)}</span></td>
+      <td><div class="row-actions">
+        <button class="btn btn-sm btn-primary" data-issue="${r.id}">Issue Code</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-issue]').forEach(b => b.onclick = () => openIssue(b.dataset.issue));
+}
+
+// ─── DEVICES ───────────────────────────────────────────────
+function renderDevices() {
+  const tbody = document.getElementById('dev-tbody');
+  if (!tbody) return;
+  if (!DEVICES.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty">No device has redeemed a code yet.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  DEVICES.forEach(d => {
+    const sub = ALL.find(s => s.id === d.subscription_id);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="t-code">${esc(sub ? sub.code : '—')}</td>
+      <td>${esc(sub ? (sub.plan === 'Custom' ? (sub.custom_plan_name || 'Custom') : sub.plan) : '—')}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${esc((d.device_id || '').slice(0, 18))}…</td>
+      <td>${esc(d.device_label || '—')}</td>
+      <td>${fmtDate(d.activated_at)}</td>
+      <td><div class="row-actions">
+        <button class="btn btn-sm btn-ghost" data-unbind="${d.id}" data-sub="${d.subscription_id}">Remove device</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('[data-unbind]').forEach(b => b.onclick = () => unbindDevice(b.dataset.unbind, b.dataset.sub));
+}
+
+async function unbindDevice(deviceId, subscriptionId) {
+  if (!confirm('Remove this device? The reader will be able to redeem the code again on that device.')) return;
+  const { error } = await supabase.from('device_activations').delete().eq('id', deviceId);
+  if (error) { toast('Could not remove device'); return; }
+  if (subscriptionId) {
+    const { count } = await supabase.from('device_activations').select('id', { count: 'exact', head: true }).eq('subscription_id', subscriptionId);
+    await supabase.from('subscriptions').update({ device_count: count || 0 }).eq('id', subscriptionId);
+  }
+  toast('Device removed');
+  await loadAll();
+}
+
+// ─── CONTENT ───────────────────────────────────────────────
+function renderChapterList() {
+  const list = document.getElementById('ch-list');
+  if (!list) return;
+  if (!CHAPTERS.length) {
+    list.innerHTML = '<div class="empty" style="padding:14px;">No chapters yet. Use "+ New Chapter" to add one.</div>';
+    return;
+  }
+  list.innerHTML = CHAPTERS.map(c => `
+    <button class="nav-row" data-chapter="${c.id}" style="display:block;width:100%;text-align:left;padding:9px 14px;border:none;background:transparent;cursor:pointer;border-bottom:1px solid var(--line);font-size:12.5px;">
+      <span style="font-family:var(--mono);font-size:9.5px;letter-spacing:1px;color:var(--ink-soft);">CH ${String(c.chapter_number).padStart(2, '0')} · ${c.is_free_preview ? 'PREVIEW' : 'FULL'}</span>
+      <div style="font-weight:500;color:var(--ink);">${esc(c.title || 'Untitled')}</div>
+      <div style="font-size:10.5px;color:var(--ink-soft);">${esc(c.status)}${c.is_free_preview ? '' : ' · paid'}</div>
+    </button>`).join('');
+  list.querySelectorAll('[data-chapter]').forEach(b => b.onclick = () => openChapterEditor(b.dataset.chapter));
+}
+
+function openChapterEditor(id) {
+  const c = CHAPTERS.find(x => x.id === id);
+  const box = document.getElementById('ch-editor');
+  if (!c || !box) return;
+  box.innerHTML = `
+    <div class="form-grid">
+      <div class="field"><label>Title</label><input type="text" id="c-title" value="${esc(c.title || '')}"></div>
+      <div class="field"><label>Chapter number</label><input type="number" id="c-number" min="1" value="${c.chapter_number}"></div>
+      <div class="field"><label>Slug</label><input type="text" id="c-slug" value="${esc(c.slug || '')}"></div>
+      <div class="field"><label>Status</label>
+        <select id="c-status">
+          <option value="draft"${c.status === 'draft' ? ' selected' : ''}>draft</option>
+          <option value="published"${c.status === 'published' ? ' selected' : ''}>published</option>
+          <option value="archived"${c.status === 'archived' ? ' selected' : ''}>archived</option>
+        </select>
+      </div>
+      <div class="field"><label>Estimated minutes</label><input type="number" id="c-minutes" min="1" value="${c.estimated_minutes || ''}"></div>
+      <div class="field"><label>Row type</label>
+        <select id="c-preview">
+          <option value="false"${!c.is_free_preview ? ' selected' : ''}>Full text — only licensed readers</option>
+          <option value="true"${c.is_free_preview ? ' selected' : ''}>Free preview — public</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px;"><label>Preview content (shown to everyone)</label>
+      <textarea id="c-preview-content" rows="4" style="width:100%;font-family:var(--mono);font-size:12px;">${esc(c.preview_content || '')}</textarea></div>
+    <div class="field" style="margin-top:14px;"><label>Full content (paid text)</label>
+      <textarea id="c-content" rows="14" style="width:100%;font-family:var(--mono);font-size:12px;">${esc(c.content || '')}</textarea></div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="c-save">Save Chapter</button>
+      <button class="btn" id="c-sibling">+ ${c.is_free_preview ? 'Full-text' : 'Preview'} row</button>
+      <button class="btn btn-danger" id="c-delete">Delete</button>
+      <span style="flex:1"></span>
+      <button class="btn btn-ghost" id="c-close">Close</button>
+    </div>
+    <p class="hint" style="margin:12px 0 0;">
+      Every chapter is stored as <strong>two rows</strong>: the preview row is public, the
+      full-text row is only readable by a licensed reader. Use the button above to add the
+      matching row for this chapter number.
+    </p>`;
+  document.getElementById('c-save').onclick = () => saveChapter(c);
+  document.getElementById('c-sibling').onclick = () => addSiblingRow(c);
+  document.getElementById('c-delete').onclick = () => deleteChapter(c);
+  document.getElementById('c-close').onclick = () => { box.innerHTML = '<div class="empty">Select a chapter on the left, or create a new one.</div>'; };
+}
+
+/* Slugs must be unique per book, so the preview and full rows of the
+   same chapter cannot share one. Strip a variant suffix first, then
+   append one only if the base slug is already taken. */
+function resolveSlug(rawSlug, chapterNumber, isPreview, selfId) {
+  const taken = new Set(CHAPTERS.filter(c => c.id !== selfId).map(c => c.slug));
+  let base = (rawSlug || '').trim().replace(/-(preview|full)$/i, '');
+  if (!base) base = slugify('chapter-' + chapterNumber);
+  if (!taken.has(base)) return base;
+  const want = isPreview ? '-preview' : '-full';
+  let candidate = base + want;
+  let n = 2;
+  while (taken.has(candidate)) candidate = base + want + '-' + (n++);
+  return candidate;
+}
+
+/* Creates the matching row (preview <-> full text) for a chapter. */
+async function addSiblingRow(c) {
+  const book = BOOKS[0];
+  if (!book) { toast('No book found — run the database migration first.'); return; }
+  const isPreview = !c.is_free_preview;
+  const slug = resolveSlug(c.slug, c.chapter_number, isPreview, null);
+  const { error } = await supabase.from('chapters').insert({
+    book_id: book.id,
+    title: c.title,
+    slug,
+    chapter_number: c.chapter_number,
+    status: 'draft',
+    is_premium: !isPreview,
+    is_free_preview: isPreview,
+    preview_content: null,
+    content: null,
+  });
+  if (error) {
+    toast('Could not add the row: ' + error.message);
+    return;
+  }
+  toast(isPreview ? 'Preview row added' : 'Full-text row added');
+  await loadAll();
+}
+
+async function saveChapter(c) {
+  const title = document.getElementById('c-title').value.trim();
+  const number = Number(document.getElementById('c-number').value) || 1;
+  const status = document.getElementById('c-status').value;
+  const minutes = Number(document.getElementById('c-minutes').value) || null;
+  const isPreview = document.getElementById('c-preview').value === 'true';
+  const previewContent = document.getElementById('c-preview-content').value;
+  const content = document.getElementById('c-content').value;
+  const slug = resolveSlug(document.getElementById('c-slug').value.trim(), number, isPreview, c.id);
+
+  const payload = {
+    title, chapter_number: number, slug, status,
+    is_free_preview: isPreview,
+    is_premium: !isPreview,
+    preview_content: previewContent || null,
+    content: content || null,
+    estimated_minutes: minutes,
+    word_count: (content || previewContent || '').split(/\s+/).filter(Boolean).length,
+  };
+
+  const { error } = await supabase.from('chapters').update(payload).eq('id', c.id);
+  if (error) { toast('Save failed: ' + error.message); return; }
+  toast('Chapter saved');
+  await loadAll();
+  openChapterEditor(c.id);
+}
+
+async function deleteChapter(c) {
+  if (!confirm('Delete this chapter row? Readers will lose access to it immediately.')) return;
+  const { error } = await supabase.from('chapters').delete().eq('id', c.id);
+  if (error) { toast('Delete failed: ' + error.message); return; }
+  toast('Chapter deleted');
+  document.getElementById('ch-editor').innerHTML = '<div class="empty">Select a chapter on the left, or create a new one.</div>';
+  await loadAll();
+}
+
+function slugify(s) {
+  return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+}
+
+async function newChapter() {
+  const book = BOOKS[0];
+  if (!book) { toast('No book found — run the database migration first.'); return; }
+  const nextNum = CHAPTERS.reduce((m, c) => Math.max(m, c.chapter_number), 0) + 1;
+  const { data, error } = await supabase.from('chapters').insert({
+    book_id: book.id,
+    title: `Chapter ${nextNum}`,
+    slug: resolveSlug('chapter-' + nextNum, nextNum, false, null),
+    chapter_number: nextNum,
+    status: 'draft',
+    is_premium: true,
+    is_free_preview: false,
+    content: null,
+  }).select().single();
+  if (error) { toast('Could not create chapter: ' + error.message); return; }
+  await loadAll();
+  openChapterEditor(data.id);
+}
+
+// ─── USERS / NEWSLETTER ────────────────────────────────────
+function renderUsers() {
+  const tbody = document.getElementById('users-tbody');
+  if (!tbody) return;
+  const q = (document.getElementById('user-search')?.value || '').trim().toLowerCase();
+  const rows = USERS.filter(u => !q || [u.full_name, u.email].filter(Boolean).join(' ').toLowerCase().includes(q));
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty">No users found.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  rows.forEach(u => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(u.full_name || '—')}</td><td>${esc(u.email || '—')}</td><td>${esc(u.role || 'user')}</td><td>${fmtDate(u.created_at)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderNews() {
+  const tbody = document.getElementById('news-tbody');
+  if (!tbody) return;
+  if (!NEWS.length) {
+    tbody.innerHTML = '<tr><td colspan="3"><div class="empty">No subscribers yet.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = '';
+  NEWS.forEach(n => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(n.email || '—')}</td><td>${esc(n.name || '—')}</td><td>${fmtDate(n.subscribed_at)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
 // ─── MAIN TABS ─────────────────────────────────────────────
 document.querySelectorAll('#admin-tabs .tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('#admin-tabs .tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById('sec-' + tab.dataset.tab).classList.add('active');
-    if (tab.dataset.tab === 'dashboard') renderChart();
+    const section = document.getElementById('sec-' + tab.dataset.tab);
+    if (!section) return;
+    section.classList.add('active');
+    // Render whatever this tab needs, so it is never empty.
+    switch (tab.dataset.tab) {
+      case 'dashboard':    renderChart(); renderDashboard(); break;
+      case 'requests':     renderRequests(); break;
+      case 'subscriptions':renderTable(); break;
+      case 'devices':      renderDevices(); break;
+      case 'content':      renderChapterList(); break;
+      case 'users':        renderUsers(); break;
+      case 'news':         renderNews(); break;
+      case 'archive':      renderArchive(); break;
+      case 'generate':     break;
+    }
   });
+});
+
+// ─── CONTENT / USERS WIRING ────────────────────────────────
+document.getElementById('ch-new-btn').addEventListener('click', () => newChapter());
+document.getElementById('user-search').addEventListener('input', () => renderUsers());
+
+// The "Pending Requests" stat card jumps to the requests tab.
+document.getElementById('st-pending-card').addEventListener('click', () => {
+  const tab = document.querySelector('#admin-tabs .tab[data-tab="requests"]');
+  if (tab) tab.click();
 });
 
 // ─── SEARCH / FILTER / PAGER ───────────────────────────────

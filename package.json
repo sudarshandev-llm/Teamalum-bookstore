@@ -4,7 +4,13 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "build": "echo 'Static site - no build needed'"
+    "build": "echo 'Static site - no build needed'",
+    "check": "npm run check:scripts && npm run check:ids && npm run verify:json",
+    "check:scripts": "node scripts/check-scripts.js index.html && node scripts/check-scripts.js admin-subscriptions.html && node scripts/check-scripts.js auth/callback.html",
+    "check:ids": "node scripts/check-ids.js index.html admin-subscriptions.html auth/callback.html",
+    "db:build": "node scripts/build-apply-sql.js",
+    "db:apply": "npm run db:build",
+    "verify:json": "node -e \"['vercel.json','package.json'].forEach(f=>{JSON.parse(require('fs').readFileSync(f,'utf8'));console.log(f+' OK')})\""
   },
   "main": "server.js",
   "engines": {

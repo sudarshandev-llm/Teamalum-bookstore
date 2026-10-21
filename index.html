@@ -187,6 +187,21 @@ h2.chap-title{font-size:clamp(24px,3vw,34px);margin:0 0 14px;}
 
 /* PURCHASE FLOW INFO */
 .purchase-info{text-align:center;margin:16px 0;padding:16px;border-radius:12px;background:rgba(47,123,245,.05);border:1px dashed rgba(47,123,245,.2);font-size:13px;color:var(--ink-soft);line-height:1.6;}
+
+/* BUYER DETAILS (purchase modal) */
+.buyer-fields{text-align:left;margin:18px 0 14px;padding:16px;border-radius:12px;background:rgba(22,82,168,.04);border:1px solid rgba(22,82,168,.12);}
+.buyer-fields .field{display:block;margin-bottom:12px;}
+.buyer-fields .field:last-child{margin-bottom:0;}
+.buyer-fields .field>span{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;}
+.buyer-fields .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.buyer-fields input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(22,82,168,.2);background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;font-size:13.5px;outline:none;transition:border-color .2s;}
+.buyer-fields input:focus{border-color:var(--blue-bright);}
+.buyer-fields input.invalid{border-color:var(--danger);background:rgba(240,173,78,.08);}
+.buyer-fields .field-hint{font-size:11.5px;color:var(--ink-soft);margin:10px 0 0;line-height:1.5;}
+.buyer-fields .field-error{font-size:11.5px;color:var(--danger);margin:8px 0 0;display:none;}
+.buyer-fields .field-error.show{display:block;}
+@media(max-width:560px){.buyer-fields .field-row{grid-template-columns:1fr;}}
+[data-theme="dark"] .buyer-fields{background:rgba(47,123,245,.08);border-color:rgba(255,255,255,.1);}
 .purchase-info strong{color:var(--blue-deep);font-family:'IBM Plex Mono',monospace;}
 .btn-premium:hover{transform:translateY(-3px);}
 .btn-premium::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.1));}
@@ -256,6 +271,42 @@ h2.chap-title{font-size:clamp(24px,3vw,34px);margin:0 0 14px;}
 .reading-nav{display:flex;justify-content:space-between;align-items:center;margin:24px 0;padding:16px 0;border-top:1px solid rgba(22,82,168,.1);}
 .reading-nav button{padding:10px 20px;border-radius:999px;border:1px solid rgba(22,82,168,.2);background:transparent;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--ink-soft);transition:all .2s;}
 .reading-nav button:hover{background:var(--light-blue);color:var(--blue-bright);}
+
+/* LICENSED READER */
+.reader-head{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid rgba(22,82,168,.1);flex-wrap:wrap;}
+.reader-head-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--blue-deep);flex:1;min-width:160px;}
+.reader-head-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--ink-soft);}
+.reader-layout{display:flex;gap:0;flex:1;min-height:0;overflow:hidden;}
+.reader-side{width:250px;flex:none;border-right:1px solid rgba(22,82,168,.1);overflow-y:auto;padding:16px 12px;background:rgba(247,250,255,.55);}
+.reader-side .legend{font-size:11px;color:var(--ink-soft);padding:8px;}
+.reader-chapter{display:block;width:100%;text-align:left;padding:9px 12px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--ink-soft);font-family:'Inter',sans-serif;line-height:1.45;margin-bottom:2px;transition:all .15s;}
+.reader-chapter:hover{background:rgba(47,123,245,.07);color:var(--blue-deep);}
+.reader-chapter.active{background:linear-gradient(135deg,#3b82f6,#14508c);color:#fff;font-weight:500;}
+.reader-chapter .rc-num{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;opacity:.75;display:block;}
+.reader-chapter.locked .rc-lock{float:right;}
+.reader-body{flex:1;min-width:0;overflow-y:auto;padding:32px 44px 24px;line-height:1.75;font-size:var(--reader-size,16px);}
+.reader-body h1{font-family:'Playfair Display',serif;font-size:27px;color:var(--blue-deep);margin:0 0 6px;}
+.reader-body h2{font-family:'Playfair Display',serif;font-size:21px;color:var(--blue-deep);margin:28px 0 10px;}
+.reader-body h3{font-size:16px;color:var(--blue-deep);margin:22px 0 8px;}
+.reader-body p{margin:0 0 14px;}
+.reader-body ul,.reader-body ol{margin:0 0 14px;padding-left:24px;}
+.reader-body li{margin-bottom:7px;}
+.reader-body blockquote{margin:0 0 16px;padding:12px 16px;border-left:3px solid var(--blue-bright);background:rgba(47,123,245,.05);border-radius:0 8px 8px 0;font-size:14.5px;}
+.reader-body pre{background:#0d1b2e;color:#dce6f2;padding:16px;border-radius:10px;overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.65;position:relative;}
+.reader-body code{font-family:'IBM Plex Mono',monospace;font-size:.88em;}
+.reader-body p code,.reader-body li code{background:rgba(22,82,168,.08);padding:2px 6px;border-radius:4px;}
+.reader-body table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px;}
+.reader-body th,.reader-body td{border:1px solid rgba(22,82,168,.15);padding:8px 10px;text-align:left;}
+.reader-body th{background:rgba(47,123,245,.06);color:var(--blue-deep);}
+.reader-body img{max-width:100%;border-radius:8px;}
+.reader-lock{text-align:center;padding:60px 24px;}
+.reader-lock .lock-icon{font-size:46px;display:block;margin-bottom:14px;}
+.reader-lock h3{font-family:'Playfair Display',serif;font-size:22px;color:var(--blue-deep);margin:0 0 8px;}
+.reader-lock p{color:var(--ink-soft);max-width:440px;margin:0 auto 20px;}
+.reader-chapter-body{position:relative;}
+.reader-empty{font-size:13px;color:var(--ink-soft);padding:20px 4px;}
+.reader-note{font-size:11.5px;color:var(--ink-soft);background:rgba(240,173,78,.08);border:1px solid rgba(240,173,78,.35);border-radius:8px;padding:9px 12px;margin-bottom:16px;}
+@media(max-width:860px){.reader-layout{flex-direction:column;}.reader-side{width:100%;max-height:140px;border-right:none;border-bottom:1px solid rgba(22,82,168,.1);}.reader-body{padding:22px 18px;}}
 
 /* PREMIUM UPGRADE */
 .premium-upgrade{text-align:center;padding:40px 20px;background:linear-gradient(180deg,rgba(47,123,245,.04),transparent);border-radius:20px;margin:20px 0;}
@@ -588,6 +639,7 @@ body,#stage,input,button,textarea{-webkit-tap-highlight-color:transparent;touch-
         <div class="reading-nav">
           <button onclick="goTo(2)">← Back to Details</button>
           <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);">Preview · Ch1 of 26</span>
+          <button onclick="openReader()" data-unlock-target hidden>📖 Read the Book</button>
           <button onclick="goTo(4)">Get Access →</button>
         </div>
       </div>
@@ -988,9 +1040,14 @@ body,#stage,input,button,textarea{-webkit-tap-highlight-color:transparent;touch-
           <h3 class="chap-title" style="font-size:16px;margin:4px 0 12px;">Prompt Engineering Blueprint</h3>
           <div id="profileBooks" style="display:flex;flex-direction:column;gap:8px;">
             <div class="card blue">
-              <div style="display:flex;align-items:center;justify-content:space-between;">
-                <div><h4 style="margin:0 0 2px;">Core Edition</h4><p style="font-size:12px;margin:0;color:var(--ink-soft);">26 chapters · Full access</p></div>
-                <span style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--success);font-weight:600;">✓ Active</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <div><h4 style="margin:0 0 2px;">Core Edition</h4><p style="font-size:12px;margin:0;color:var(--ink-soft);" id="profileBookStatus">26 chapters · Full access</p></div>
+                <span style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);font-weight:600;" id="profileBookBadge">—</span>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn-premium" onclick="openReader()" data-unlock-target hidden style="padding:10px 20px;font-size:12px;">📖 Read the Book</button>
+                <button class="btn-glass" onclick="goTo(7)" data-locked-target style="padding:10px 20px;font-size:12px;">Redeem a code</button>
+                <button class="btn-glass" onclick="goTo(4)" data-locked-target style="padding:10px 20px;font-size:12px;">Get access</button>
               </div>
             </div>
           </div>
@@ -1027,6 +1084,29 @@ body,#stage,input,button,textarea{-webkit-tap-highlight-color:transparent;touch-
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LICENSED READER -->
+<section class="page" id="page-reader" data-index="14">
+  <div class="sheet">
+    <div class="sheet-inner paper-noise" style="padding:0;">
+      <div class="reader-head">
+        <button class="btn btn-ghost btn-sm" onclick="goTo(0)">&larr; Home</button>
+        <div class="reader-head-title">Prompt Engineering Blueprint</div>
+        <div class="reader-head-meta" id="readerMeta">—</div>
+      </div>
+      <div class="reader-layout">
+        <aside class="reader-side" id="readerChapters"><div class="legend">Loading chapters…</div></aside>
+        <div class="reader-body" id="readerBody">
+          <div class="reader-empty">Loading your book…</div>
+        </div>
+      </div>
+      <div class="reading-nav" style="margin:0;padding:12px 24px;">
+        <button id="readerPrev">← Previous chapter</button>
+        <button id="readerNext">Next chapter →</button>
       </div>
     </div>
   </div>
@@ -1160,7 +1240,7 @@ The NLI version reduces the task to a single sentence. No syntax to memorize, no
 
 <script>
 const pages = Array.from(document.querySelectorAll('.page'));
-const names = ["HOME","BOOK","DETAILS","PREVIEW","PURCHASE","ROADMAP","INSIDE","REDEEM","TEAM","ABOUT","COMMUNITY","EXERCISES","PROMPTLAB","PROFILE"];
+const names = ["HOME","BOOK","DETAILS","PREVIEW","PURCHASE","ROADMAP","INSIDE","REDEEM","TEAM","ABOUT","COMMUNITY","EXERCISES","PROMPTLAB","PROFILE","READER"];
 let current = 0;
 let fontSize = 16;
 
@@ -1401,6 +1481,15 @@ function openPurchaseModal(plan, duration, price){
   document.getElementById('modalConfirmBtn').setAttribute('data-plan', plan);
   document.getElementById('modalConfirmBtn').setAttribute('data-duration', duration);
   document.getElementById('modalConfirmBtn').setAttribute('data-price', price);
+  // prefill with the signed-in account so buyers only type it once
+  const emailField = document.getElementById('buyerEmail');
+  const nameField  = document.getElementById('buyerName');
+  if (emailField && !emailField.value && currentUser && currentUser.email) emailField.value = currentUser.email;
+  if (nameField  && !nameField.value  && currentUser && currentUser.user_metadata && currentUser.user_metadata.full_name)
+    nameField.value = currentUser.user_metadata.full_name;
+  const err = document.getElementById('buyerError');
+  if (err) err.classList.remove('show');
+  if (emailField) emailField.classList.remove('invalid');
   modal.classList.add('active');
 }
 
@@ -1408,23 +1497,116 @@ function closePurchaseModal(){
   document.getElementById('purchaseModal').classList.remove('active');
 }
 
+const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
 function confirmWhatsApp(){
   const plan = document.getElementById('modalConfirmBtn').getAttribute('data-plan');
   const duration = document.getElementById('modalConfirmBtn').getAttribute('data-duration');
   const price = document.getElementById('modalConfirmBtn').getAttribute('data-price');
+
+  const emailField = document.getElementById('buyerEmail');
+  const nameField  = document.getElementById('buyerName');
+  const phoneField = document.getElementById('buyerPhone');
+  const errEl      = document.getElementById('buyerError');
+
+  const email  = (emailField?.value || '').trim();
+  const name   = (nameField?.value  || '').trim();
+  const phone  = (phoneField?.value || '').trim();
+
+  // The buyer's email is REQUIRED — it is how the license code is
+  // delivered and how the reader recognises the account.
+  if (!EMAIL_RE.test(email)) {
+    errEl?.classList.add('show');
+    emailField?.classList.add('invalid');
+    emailField?.focus();
+    return;
+  }
+  errEl?.classList.remove('show');
+  emailField?.classList.remove('invalid');
+
   const msg = encodeURIComponent(
-    `Hi Team Alum! I'd like to purchase the "${plan}" plan (${duration}) for ₹${price} for the Prompt Engineering Blueprint. Please share payment details. My email: socialsudarshan8@gmail.com`
+    `Hi Team Alum! I'd like to purchase the "${plan}" plan (${duration}) for ₹${price} for the Prompt Engineering Blueprint.\n\n` +
+    `Please share payment details.\n` +
+    `My email: ${email}\n` +
+    (name  ? `My name: ${name}\n` : '') +
+    (phone ? `My WhatsApp number: ${phone}\n` : '')
   );
-window.open(`https://wa.me/917775990933?text=${msg}`, '_blank');
+  window.open(`https://wa.me/917775990933?text=${msg}`, '_blank');
   closePurchaseModal();
-  // Record purchase request (code stays NULL until admin issues it after payment verification)
+
+  // Record the purchase request so the admin knows WHO is waiting.
+  // The code stays NULL and status stays 'pending' until the admin
+  // verifies the WhatsApp payment and issues a license.
   (async () => {
     try {
       const sb = window._supabase;
       if (!sb) return;
-      await sb.rpc('request_purchase', { p_plan: plan, p_amount: Number(price) });
+      const { error } = await sb.rpc('request_purchase', {
+        p_plan: plan,
+        p_amount: Number(price),
+        p_email: email,
+        p_name: name || null,
+        p_phone: phone || null,
+      });
+      if (error) console.warn('purchase request not recorded:', error.message);
     } catch (e) { /* non-critical — WhatsApp flow is the source of truth */ }
   })();
+}
+
+/* ============================================================
+   LICENSE / ENTITLEMENT + READER
+   ------------------------------------------------------------
+   The license is NEVER trusted from localStorage alone. The stored
+   code is re-validated against the server on every page load and
+   every time the reader opens, so a tampered localStorage entry
+   grants nothing.
+   ============================================================ */
+const LICENSE_KEY = 'ta-pe-license';
+const DEVICE_KEY  = 'ta-pe-device-id';
+
+function getDeviceId(){
+  let id = localStorage.getItem(DEVICE_KEY);
+  if (!id) {
+    id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'd-' + Math.random().toString(36).slice(2);
+    localStorage.setItem(DEVICE_KEY, id);
+  }
+  return id;
+}
+function getDeviceLabel(){
+  const ua = (navigator.userAgent || '').match(/Chrome\/[\d.]+|Firefox\/[\d.]+|Safari\/[\d.]+|Edge\/[\d.]+/);
+  return `${navigator.platform || ''} ${ua ? ua[0] : ''}`.trim();
+}
+function loadEntitlement(){
+  try { return JSON.parse(localStorage.getItem(LICENSE_KEY) || 'null'); }
+  catch { return null; }
+}
+function saveEntitlement(data){
+  localStorage.setItem(LICENSE_KEY, JSON.stringify({
+    code: data.code, plan: data.plan, expires_at: data.expires_at
+  }));
+}
+function clearEntitlement(){
+  localStorage.removeItem(LICENSE_KEY);
+}
+
+/* Validate a code against the server.
+   `redeem_code` binds the device AND the account; `validate_code`
+   is the pre-migration fallback so the site keeps working if the
+   database migration has not been applied yet. */
+async function validateLicense(code, deviceId){
+  const sb = window._supabase;
+  if (!sb) throw new Error('offline');
+
+  let { data, error } = await sb.rpc('redeem_code', {
+    p_code: code, p_device_id: deviceId, p_device_label: getDeviceLabel()
+  });
+  if (error && /redeem_code|PGRST202|not found/i.test(error.message || '')) {
+    ({ data, error } = await sb.rpc('validate_code', {
+      p_code: code, p_device_id: deviceId, p_device_label: getDeviceLabel()
+    }));
+  }
+  if (error) throw error;
+  return data || {};
 }
 
 /* --- Redeem License --- */
@@ -1438,7 +1620,7 @@ function redeemCode(){
     result.textContent = 'Please enter a license code.';
     return;
   }
-  const pattern = /^TA-PE-(1M|3M|LT)-[A-Z0-9]{6}$/;
+  const pattern = /^TA-PE-([A-Z0-9]{2,4})-[A-Z0-9]{6}$/;
   if(!pattern.test(code)){
     result.className = 'redeem-result error';
     result.textContent = 'Invalid code format. Expected format: TA-PE-XX-XXXXXX';
@@ -1450,37 +1632,21 @@ function redeemCode(){
   result.textContent = 'Checking license...';
   (async () => {
     try {
-      const sb = window._supabase;
-      if (!sb) throw new Error('offline');
-      let deviceId = localStorage.getItem('ta-pe-device-id');
-      if (!deviceId) {
-        deviceId = (crypto.randomUUID ? crypto.randomUUID() : 'd-' + Math.random().toString(36).slice(2));
-        localStorage.setItem('ta-pe-device-id', deviceId);
-      }
-      const label = `${navigator.platform || ''} ${navigator.userAgent?.match(/Chrome\/[\d.]+|Firefox\/[\d.]+|Safari\/[\d.]+/)?.[0] || ''}`.trim();
-      const { data, error } = await sb.rpc('validate_code', {
-        p_code: code,
-        p_device_id: deviceId,
-        p_device_label: label
-      });
-      if (error) throw error;
+      const data = await validateLicense(code, getDeviceId());
       if (data && data.valid) {
+        persistEntitlement(code, data);
         result.className = 'redeem-result success';
-        result.textContent = '✅ License verified! Unlocking your book...';
-        localStorage.setItem('ta-pe-license', JSON.stringify({ code, plan: data.plan, expires_at: data.expires_at }));
-        setTimeout(() => { goTo(3); }, 1200);
+        result.textContent = '✅ License verified! Opening your book...';
+        readerState.licensed = true;
+        await loadChapters(code, true);
+        setTimeout(() => { goTo(14); }, 900);
       } else if (data && data.reason === 'not_found' && typeof window.redeemLicense === 'function') {
         // Legacy redeem_codes registry (requires Google sign-in)
         result.textContent = '⏳ Verifying legacy code...';
         window.redeemLicense(code, result);
       } else {
         result.className = 'redeem-result error';
-        const reason = data?.reason;
-        if (reason === 'expired') result.textContent = '❌ This license has expired. Please renew via WhatsApp.';
-        else if (reason === 'revoked') result.textContent = '❌ This license has been revoked. Contact support.';
-        else if (reason === 'device_limit') result.textContent = '❌ Device limit reached (3 devices). Contact support to reset.';
-        else if (reason === 'not_found') result.textContent = '❌ License code not found. Check the code or contact support.';
-        else result.textContent = '❌ License code is not active. Contact support.';
+        result.textContent = redeemErrorText(data && data.reason);
       }
     } catch (e) {
       result.className = 'redeem-result error';
@@ -1489,6 +1655,191 @@ function redeemCode(){
       redeemInFlight = false;
     }
   })();
+}
+
+function redeemErrorText(reason){
+  switch(reason){
+    case 'expired':               return '❌ This license has expired. Please renew via WhatsApp.';
+    case 'revoked':               return '❌ This license has been revoked. Contact support.';
+    case 'device_limit':          return '❌ Device limit reached (3 devices). Contact support to reset.';
+    case 'payment_not_verified':  return '❌ Payment for this license is still being verified. Please try again shortly.';
+    case 'device_not_bound':      return '❌ This device is not registered for this license. Redeem the code here first.';
+    case 'not_found':             return '❌ License code not found. Check the code or contact support.';
+    default:                      return '❌ License code is not active. Contact support.';
+  }
+}
+
+/* ============================================================
+   READER — loads the book through the server-side entitlement
+   check. Nothing is rendered from the HTML source, so the paid
+   chapters are never shipped to a browser without a license.
+   ============================================================ */
+let readerState = { chapters: [], index: 0, code: null, plan: null, licensed: false };
+
+async function loadChapters(code, force){
+  if (!code) return false;
+  if (!force && readerState.chapters.length && readerState.code === code) return true;
+
+  const sb = window._supabase;
+  if (!sb) return false;
+  const deviceId = getDeviceId();
+
+  let { data, error } = await sb.rpc('get_chapters', { p_code: code, p_device_id: deviceId });
+  if (error && /get_chapters|PGRST202|not found/i.test(error.message || '')) {
+    // Migration not applied yet: fall back to a direct (RLS-gated) read.
+    const res = await sb.from('chapters')
+      .select('chapter_number,title,slug,content,is_free_preview,word_count,estimated_minutes')
+      .eq('status', 'published')
+      .order('chapter_number');
+    if (res.error) { renderReaderError(res.error.message); return false; }
+    data = { ok: true, chapters: res.data || [] };
+  }
+  if (error) { renderReaderError(error.message); return false; }
+  if (!data || !data.ok) {
+    renderReaderError(data && data.reason ? redeemErrorText(data.reason) : 'Could not load the book.');
+    return false;
+  }
+
+  readerState.chapters = data.chapters || [];
+  readerState.code = code;
+  readerState.plan = data.plan || (loadEntitlement() || {}).plan || null;
+  readerState.index = 0;
+  renderReader();
+  return true;
+}
+
+function renderReaderError(msg){
+  readerState.chapters = [];
+  document.getElementById('readerChapters').innerHTML = '<div class="legend">No chapters available</div>';
+  document.getElementById('readerBody').innerHTML =
+    `<div class="reader-lock"><span class="lock-icon">🔒</span><h3>Book unavailable</h3><p>${escapeHtml(msg || 'Could not load the book.')}</p>
+     <button class="btn-premium" onclick="goTo(7)">Enter a license code</button></div>`;
+}
+
+function renderReader(){
+  const side = document.getElementById('readerChapters');
+  const body = document.getElementById('readerBody');
+  const meta = document.getElementById('readerMeta');
+  const ent  = loadEntitlement();
+
+  if (!readerState.chapters.length) {
+    side.innerHTML = '<div class="legend">No chapters available</div>';
+    body.innerHTML =
+      `<div class="reader-lock"><span class="lock-icon">📖</span><h3>No chapters published yet</h3>
+       <p>Your license is active, but the chapter content has not been uploaded yet. Check back soon.</p></div>`;
+    if (meta) meta.textContent = ent && ent.plan ? String(ent.plan).toUpperCase() : '';
+    return;
+  }
+
+  side.innerHTML = readerState.chapters.map((c, i) => {
+    const locked = c.is_free_preview && !readerState.licensed;
+    return `<button class="reader-chapter${i === readerState.index ? ' active' : ''}${locked ? ' locked' : ''}" data-ch="${i}">
+      <span class="rc-num">CHAPTER ${String(c.chapter_number).padStart(2,'0')}</span>
+      ${escapeHtml(c.title || '')}${locked ? '<span class="rc-lock">🔒</span>' : ''}</button>`;
+  }).join('');
+
+  side.querySelectorAll('.reader-chapter').forEach(b => {
+    b.addEventListener('click', () => {
+      const i = Number(b.dataset.ch);
+      if (readerState.chapters[i] && readerState.chapters[i].is_free_preview && !readerState.licensed) {
+        goTo(3); // free preview lives on its own page
+        return;
+      }
+      readerState.index = i;
+      renderReader();
+    });
+  });
+
+  const ch = readerState.chapters[readerState.index];
+  const isPreview = ch.is_free_preview;
+  body.innerHTML = (isPreview
+      ? '<div class="reader-note">This is the free preview. Redeem a license to read the complete chapter.</div>'
+      : '') +
+    '<div class="reader-chapter-body" id="readerChapterBody"></div>';
+  document.getElementById('readerChapterBody').innerHTML =
+    renderMarkdown(ch.content || '*This chapter has no content yet.*');
+
+  if (meta) {
+    const bits = [];
+    if (readerState.plan) bits.push(String(readerState.plan).toUpperCase());
+    bits.push(`CH ${String(ch.chapter_number).padStart(2,'0')} / ${String(readerState.chapters.length).padStart(2,'0')}`);
+    if (ent && ent.expires_at) bits.push('UNTIL ' + new Date(ent.expires_at).toLocaleDateString());
+    meta.textContent = bits.join(' · ');
+  }
+
+  document.getElementById('readerPrev').disabled = readerState.index <= 0;
+  document.getElementById('readerNext').disabled = readerState.index >= readerState.chapters.length - 1;
+  document.getElementById('readerBody').scrollTop = 0;
+  saveReadingProgress(ch.chapter_number);
+}
+
+/* Persist reading progress for signed-in readers. */
+async function saveReadingProgress(chapterNumber){
+  if (!currentUser || !window._supabase) return;
+  try {
+    await window._supabase.from('reading_progress').upsert(
+      { user_id: currentUser.id, chapter_number: chapterNumber, completed: false },
+      { onConflict: 'user_id,chapter_number' }
+    );
+  } catch { /* progress tracking is best-effort */ }
+}
+
+/* Persist a validated licence. The code always comes from the value we
+   just validated — `redeem_code` returns it, the legacy
+   `validate_code` fallback does not. */
+function persistEntitlement(code, data){
+  saveEntitlement({
+    code,
+    plan: (data && data.plan) || null,
+    expires_at: (data && data.expires_at) || null,
+  });
+}
+
+/* Open the reader: re-validates the license with the server first. */
+async function openReader(){
+  const ent = loadEntitlement();
+  if (!ent || !ent.code) { goTo(4); return; }
+  document.getElementById('readerBody').innerHTML = '<div class="reader-empty">Checking your license…</div>';
+  goTo(14);
+  try {
+    const data = await validateLicense(ent.code, getDeviceId());
+    if (!data || !data.valid) {
+      clearEntitlement();
+      updateUnlockUi(false);
+      renderReaderError(redeemErrorText(data && data.reason));
+      return;
+    }
+    persistEntitlement(ent.code, data);
+    readerState.licensed = true;
+    await loadChapters(ent.code, true);
+  } catch (e) {
+    renderReaderError('Could not verify your license. Check your connection and try again.');
+  }
+}
+
+/* Called on page load: re-validate any stored license. */
+async function checkEntitlement(){
+  const ent = loadEntitlement();
+  if (!ent || !ent.code) { updateUnlockUi(false); return; }
+  try {
+    const data = await validateLicense(ent.code, getDeviceId());
+    if (!data || !data.valid) { clearEntitlement(); updateUnlockUi(false); return; }
+    persistEntitlement(ent.code, data);
+    readerState.licensed = true;
+    updateUnlockUi(true);
+  } catch {
+    // network problem — keep the stored code but do not unlock
+    updateUnlockUi(false);
+  }
+}
+
+/* Show/hide the "Read the Book" affordances. */
+function updateUnlockUi(unlocked){
+  document.querySelectorAll('[data-unlock-target]').forEach(el => {
+    el.hidden = !unlocked;
+    el.disabled = !unlocked;
+  });
+  document.querySelectorAll('[data-locked-target]').forEach(el => { el.hidden = !!unlocked; });
 }
 
 /* --- FAQ Toggle --- */
@@ -1520,9 +1871,28 @@ updateDots();
         <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--blue-deep);margin-top:4px;" id="modalPlanPrice">₹199</div>
       </div>
     </div>
+    <div class="buyer-fields">
+      <label class="field">
+        <span>Your email &nbsp;<b style="color:var(--danger)">*</b></span>
+        <input type="email" id="buyerEmail" placeholder="you@example.com" autocomplete="email" maxlength="120" spellcheck="false">
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Name</span>
+          <input type="text" id="buyerName" placeholder="Your name" autocomplete="name" maxlength="80">
+        </label>
+        <label class="field">
+          <span>WhatsApp phone</span>
+          <input type="tel" id="buyerPhone" placeholder="+91 98765 43210" autocomplete="tel" maxlength="24">
+        </label>
+      </div>
+      <p class="field-hint">Your license code is delivered to this email address, and the same address unlocks the reader on any of your devices.</p>
+      <p class="field-error" id="buyerError">Please enter a valid email address so we can deliver your license code.</p>
+    </div>
     <div class="purchase-info" style="text-align:left;">
       <strong>How it works:</strong>
       <ol style="margin:8px 0 0 16px;padding:0;line-height:1.8;">
+        <li>Enter your email above</li>
         <li>Click "Continue on WhatsApp" below</li>
         <li>Send the pre-filled message to our team</li>
         <li>Complete payment via the details shared</li>
@@ -1579,7 +1949,18 @@ window.handleAuthClick = async function() {
     localStorage.setItem('sb-user', JSON.stringify(currentUser));
   }
   updateUserUI();
+  // Re-validate any stored license against the server so the
+  // "Read the Book" buttons reflect the true entitlement.
+  checkEntitlement();
 })();
+
+// Reader navigation
+document.getElementById('readerPrev').addEventListener('click', () => {
+  if (readerState.index > 0) { readerState.index--; renderReader(); }
+});
+document.getElementById('readerNext').addEventListener('click', () => {
+  if (readerState.index < readerState.chapters.length - 1) { readerState.index++; renderReader(); }
+});
 
 // Sign out handler
 window.handleSignOut = async function() {
@@ -1606,14 +1987,30 @@ window.loadProfilePage = async function() {
   document.getElementById('profileAvatar').textContent = currentUser.email?.[0]?.toUpperCase() || 'U';
   document.getElementById('profileName').textContent = currentUser.user_metadata?.full_name || currentUser.email || 'Reader';
   document.getElementById('profileEmail').textContent = currentUser.email || '';
-  try {
-    const { data: licenses } = await supabase.from('licenses').select('*').eq('user_id', currentUser.id);
-    const hasLicense = licenses && licenses.length > 0;
-    document.getElementById('statLicense').textContent = hasLicense ? licenses[0].plan : 'Free';
-    document.getElementById('statLicense').style.color = hasLicense ? 'var(--success)' : 'var(--ink-soft)';
-  } catch {
-    document.getElementById('statLicense').textContent = '—';
+  // License status comes from the server-validated entitlement, not from
+  // the legacy `licenses` table (which the current redemption flow no
+  // longer writes to) and not from localStorage (which is not trusted).
+  // `readerState.licensed` is only true after the server has confirmed
+  // the code on this device.
+  const ent = loadEntitlement();
+  const subscribed = readerState.licensed === true;
+  const statEl = document.getElementById('statLicense');
+  const badgeEl = document.getElementById('profileBookBadge');
+  const bookStatusEl = document.getElementById('profileBookStatus');
+  if (statEl) {
+    statEl.textContent = subscribed ? (ent.plan || 'Active') : 'Free';
+    statEl.style.color = subscribed ? 'var(--success)' : 'var(--ink-soft)';
   }
+  if (badgeEl) {
+    badgeEl.textContent = subscribed ? '✓ Active' : 'Not licensed';
+    badgeEl.style.color = subscribed ? 'var(--success)' : 'var(--ink-soft)';
+  }
+  if (bookStatusEl) {
+    bookStatusEl.textContent = subscribed
+      ? 'Full access · ' + (ent.plan || 'Active') + (ent.expires_at ? ' · until ' + new Date(ent.expires_at).toLocaleDateString() : '')
+      : '26 chapters · Full access (license required)';
+  }
+  updateUnlockUi(subscribed);
   try {
     const { data: progress } = await supabase.from('reading_progress').select('*').eq('user_id', currentUser.id);
     if (progress && progress.length > 0) {

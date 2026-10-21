@@ -1,241 +1,296 @@
 # API Documentation
 
-## Authentication
+## There is no custom API server
 
-All API routes use Supabase session cookies for authentication. Protected routes require a valid session. Public routes are accessible without authentication.
+This project has **no Next.js API routes and no backend of its own**. The browser talks
+straight to Supabase over its REST + RPC interface using the *anon* key. All business
+logic (entitlement, redemption, content gating) lives in Postgres functions and RLS
+policies — that is deliberate, because a rule enforced only in JavaScript can be bypassed
+by editing the browser.
 
-### Auth Endpoints
+So "the API" is:
 
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| POST | /api/auth/register | Register new user | No |
-| POST | /api/auth/login | Login with email/password | No |
-| POST | /api/auth/logout | Logout current session | Yes |
-| POST | /api/auth/forgot-password | Send password reset email | No |
+1. **Supabase PostgREST** — table reads/writes (`/rest/v1/<table>`), governed by RLS
+2. **Supabase RPC** — the `public.*` functions below, invoked as `/rest/v1/rpc/<fn>`
+3. **Supabase Auth** — `/auth/v1/*` (Google OAuth, email/password, session)
 
-### Book Endpoints
+Base URL: `https://gvkcwtoryrzgbtufsgff.supabase.co`
 
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| GET | /api/books | List all published books | No |
-| GET | /api/books/[slug] | Get book by slug | No |
-| GET | /api/books/[slug]/chapters | List chapters for a book | No |
-| POST | /api/books | Create new book | Admin |
-| PUT | /api/books/[id] | Update book | Admin |
-| DELETE | /api/books/[id] | Delete book | Admin |
+Headers on every request:
 
-### Chapter Endpoints
-
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| GET | /api/chapters/[id] | Get chapter content | Licensed |
-| POST | /api/chapters | Create chapter | Admin |
-| PUT | /api/chapters/[id] | Update chapter | Admin |
-| DELETE | /api/chapters/[id] | Delete chapter | Admin |
-
-### License Endpoints
-
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| GET | /api/licenses | Get user licenses | Yes |
-| POST | /api/licenses/redeem | Redeem a license code | Yes |
-| GET | /api/licenses/check/[bookId] | Check access to a book | Yes |
-
-### Progress & Bookmarks
-
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| GET | /api/progress/[bookId] | Get reading progress | Yes |
-| POST | /api/progress/save | Save reading progress | Yes |
-| GET | /api/bookmarks/[bookId] | Get bookmarks | Yes |
-| POST | /api/bookmarks | Add bookmark | Yes |
-| DELETE | /api/bookmarks/[id] | Remove bookmark | Yes |
-
-### Newsletter & Contact
-
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| POST | /api/newsletter/subscribe | Subscribe to newsletter | No |
-| POST | /api/contact | Submit contact form | No |
-
-### Admin Endpoints
-
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| GET | /api/admin/users | List all users | Admin |
-| GET | /api/admin/analytics | Get analytics data | Admin |
-| GET | /api/admin/audit-logs | Get audit logs | Admin |
-| GET | /api/admin/redeem-codes | List redeem codes | Admin |
-| POST | /api/admin/redeem-codes/generate | Generate codes | Admin |
-| GET | /api/admin/support-tickets | List tickets | Admin |
-| PUT | /api/admin/support-tickets/[id] | Update ticket | Admin |
+```
+apikey: <anon key>
+Authorization: Bearer <session JWT>   # only for signed-in calls
+Content-Type: application/json
+```
 
 ---
 
-## Request/Response Formats
+## RPC functions
 
-### GET /api/books
+These are the only write paths that matter. They are all `security definer`, so they
+bypass RLS deliberately — the checks live inside the function body.
 
-**Response:**
+### `redeem_code(code, device_id, device_label)`
+
+The single entry point for redemption. Validates the code, binds the device, binds the
+account, activates the subscription.
+
+| Parameter | Type | Notes |
+|-----------|------|-------|
+| `p_code` | text | e.g. `TA-PE-3M-A1B2C3`. Case-insensitive, trimmed |
+| `p_device_id` | text | Stable per-browser id (UUID in `localStorage`) |
+| `p_device_label` | text | e.g. `"Win32 Chrome"` — shown in the admin panel |
+
+**Success**
+
+```json
+{
+  "valid": true,
+  "code": "TA-PE-3M-A1B2C3",
+  "plan": "Professional",
+  "expires_at": "2026-11-22T10:00:00+00:00",
+  "user_bound": true,
+  "device_count": 1
+}
+```
+
+**Failure** — `valid` is `false` and `reason` explains why:
+
+| `reason` | Meaning |
+|----------|---------|
+| `not_found` | No such code (also returned for null/empty input) |
+| `revoked` | The admin revoked it |
+| `expired` | `expires_at` is in the past (checked in real time, not by cron) |
+| `payment_not_verified` | A public purchase request the admin has not confirmed yet |
+| `device_limit` | Already bound to 3 devices (limit is 3) |
+| `active` / `expired` / `pending` | The stored `status` was not usable |
+
+---
+
+### `validate_code(code, device_id, device_label)`
+
+Identical behaviour — it simply delegates to `redeem_code`. Kept for backwards
+compatibility with older clients. The storefront calls `redeem_code` first and only falls
+back to `validate_code` if the function does not exist yet.
+
+---
+
+### `get_chapters(code, device_id)`
+
+Returns the book content **only** if the code is valid *and* the device is already bound
+to it.
+
+**Success**
+
+```json
+{
+  "ok": true,
+  "plan": "Lifetime",
+  "expires_at": null,
+  "chapters": [
+    {
+      "chapter_number": 1,
+      "title": "Foundations of Prompt Engineering",
+      "slug": "chapter-1",
+      "content": "# Foundations\n\n...",
+      "is_free_preview": false,
+      "word_count": 3120,
+      "estimated_minutes": 14
+    }
+  ]
+}
+```
+
+When a chapter has both a preview row and a full row, the **full row wins** (the preview
+is a teaser for non-readers; a licensed reader gets the real text).
+
+**Failure**
+
+```json
+{ "ok": false, "reason": "device_not_bound" }
+```
+
+Possible reasons: `not_found`, `revoked`, `expired`, `payment_not_verified`,
+`device_not_bound`.
+
+---
+
+### `get_book_outline()`
+
+Public chapter list **without any content** — safe for anonymous callers.
+
 ```json
 [
-  {
-    "id": "uuid",
-    "title": "Learn TypeScript",
-    "slug": "learn-typescript",
-    "author": "Sudarshan",
-    "description": "A comprehensive guide...",
-    "cover_url": "https://...",
-    "chapters_count": 12,
-    "examples_count": 45,
-    "templates_count": 8,
-    "what_you_learn": ["TypeScript fundamentals", "Advanced types"],
-    "prerequisites": ["Basic JavaScript"],
-    "is_published": true
-  }
+  { "chapter_number": 1, "title": "Foundations", "slug": "chapter-1",
+    "free_preview": true, "word_count": 3120, "estimated_minutes": 14 }
 ]
 ```
 
-### GET /api/chapters/[id]
+---
 
-**Headers Required:** `Authorization: Bearer <session>` (for premium chapters)
+### `has_active_subscription()`
 
-**Response:**
-```json
-{
-  "id": "uuid",
-  "book_id": "uuid",
-  "title": "Getting Started",
-  "chapter_number": 1,
-  "content": "# Chapter 1\n\nWelcome to...",
-  "is_premium": false,
-  "est_read_time": 15
-}
-```
+No arguments. Returns `true` when the *current caller* (from the JWT) owns an active
+subscription. Used inside RLS policies, so it can never be used to probe somebody
+else's entitlement.
 
-**Error Response (Premium - No License):**
-```json
-{
-  "error": "Premium content requires an active license",
-  "code": "LICENSE_REQUIRED",
-  "status": 403
-}
-```
+The caller qualifies if **any** of these hold:
 
-### POST /api/licenses/redeem
+- `subscriptions.user_id = auth.uid()`, or
+- `lower(subscriptions.buyer_email) = lower(auth.jwt() ->> 'email')`
 
-**Request:**
-```json
-{
-  "code": "TA-PE-1M-A1B2C3",
-  "book_id": "uuid"
-}
-```
+…and the row satisfies:
 
-**Response (Success):**
-```json
-{
-  "success": true,
-  "license": {
-    "id": "uuid",
-    "plan_type": "1M",
-    "expires_at": "2026-08-05T00:00:00Z",
-    "is_active": true
-  }
-}
-```
-
-**Error Response:**
-```json
-{
-  "error": "Invalid or already used code",
-  "code": "INVALID_CODE",
-  "status": 400
-}
-```
-
-### POST /api/progress/save
-
-**Request:**
-```json
-{
-  "chapter_id": "uuid",
-  "book_id": "uuid",
-  "progress": 65,
-  "last_position": "scroll_65"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true
-}
-```
-
-### POST /api/newsletter/subscribe
-
-**Request:**
-```json
-{
-  "email": "user@example.com"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Successfully subscribed to newsletter"
-}
-```
+- `status = 'active'`
+- `expires_at IS NULL OR expires_at > now()`
+- `payment_verified = true` **or** `created_by <> 'public'`
 
 ---
 
-## Example curl Commands
+### `owns_subscription(subscription_id)`
+
+`true` when the caller owns that specific subscription row. Powers the
+"Users can view own subscription" / "Users can view own device activations" policies.
+
+---
+
+### `request_purchase(plan, amount, email, name, phone)`
+
+Creates a **pending** purchase request. This is the only way the public can write to
+`subscriptions` — a raw `INSERT` with the anon key is rejected by RLS.
+
+| Parameter | Type | Notes |
+|-----------|------|-------|
+| `p_plan` | text | `Starter` \| `Professional` \| `Lifetime` \| `Custom` |
+| `p_amount` | numeric | INR amount |
+| `p_email` | text | Required by the client; malformed addresses are stored as `NULL` |
+| `p_name` | text | Optional |
+| `p_phone` | text | Optional |
+
+Returns the new row's `uuid`.
+
+The row it creates always has `code = NULL`, `status = 'pending'`,
+`payment_verified = false`, `created_by = 'public'`. It becomes redeemable only after the
+admin confirms the payment from `/admin` → Purchase Requests → **Issue Code**.
+
+> The old two-argument `(text, numeric)` overload was dropped so PostgREST cannot pick
+> the wrong one. The client always sends all five keys.
+
+---
+
+### `is_admin()`
+
+Returns `true` when `auth.jwt() ->> 'email' = 'teamalumorg@gmail.com'`.
+There is exactly one admin account. The check does not depend on a `profiles.role` row,
+so it cannot be locked out by a bad seed.
+
+---
+
+### `expire_subscriptions()`
+
+Marks already-expired rows as `expired`. **Not callable by `anon` or `authenticated`**
+anymore — it is a maintenance function for `service_role` / the cron job. Real-time
+expiry is enforced inside `redeem_code` and `get_chapters`, so nothing depends on it
+running.
+
+---
+
+## Tables
+
+Reads and writes go through `/rest/v1/<table>` with the anon key; RLS decides what is
+visible. Only these three are writable by the public:
+
+| Table | Public write? | How |
+|-------|---------------|-----|
+| `newsletter_subscribers` | ✅ INSERT | "anyone can subscribe" policy |
+| `contact_messages` | ✅ INSERT | "anyone can submit messages" policy |
+| `subscriptions` | ⚠️ via RPC only | `request_purchase()` — direct INSERT is blocked |
+| `chapters` / `books` | ❌ | admin only |
+| `device_activations` | ❌ | written by `redeem_code()` |
+
+---
+
+## Errors
+
+PostgREST returns:
+
+```json
+{ "code": "42501", "message": "new row violates row-level security policy for table \"subscriptions\"" }
+```
+
+| Code | Meaning |
+|------|---------|
+| `42501` | RLS blocked the operation — you are not allowed to see/write that row |
+| `PGRST202` | Function not found — usually means the migration has not been applied yet |
+| `PGRST202` / `42883` on `rpc()` | The client falls back to a direct table read |
+
+---
+
+## Example requests
 
 ```bash
-# List all published books
-curl https://teamalum-bookstore.vercel.app/api/books
+SB=https://gvkcwtoryrzgbtufsgff.supabase.co
+KEY=<anon key>
 
-# Get a book by slug
-curl https://teamalum-bookstore.vercel.app/api/books/learn-typescript
+# Redeem a code
+curl -X POST "$SB/rest/v1/rpc/redeem_code" \
+  -H "apikey: $KEY" -H "Content-Type: application/json" \
+  -d '{"p_code":"TA-PE-3M-A1B2C3","p_device_id":"device-abc","p_device_label":"Win32 Chrome"}'
 
-# Subscribe to newsletter
-curl -X POST https://teamalum-bookstore.vercel.app/api/newsletter/subscribe \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com"}'
+# Fetch the book with that code
+curl -X POST "$SB/rest/v1/rpc/get_chapters" \
+  -H "apikey: $KEY" -H "Content-Type: application/json" \
+  -d '{"p_code":"TA-PE-3M-A1B2C3","p_device_id":"device-abc"}'
 
-# Submit contact form
-curl -X POST https://teamalum-bookstore.vercel.app/api/contact \
-  -H "Content-Type: application/json" \
-  -d '{"name": "John", "email": "john@example.com", "subject": "Help", "message": "I need assistance"}'
+# Public outline (no content)
+curl -X POST "$SB/rest/v1/rpc/get_book_outline" \
+  -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}'
 
-# Redeem a license code (authenticated)
-curl -X POST https://teamalum-bookstore.vercel.app/api/licenses/redeem \
-  -H "Content-Type: application/json" \
-  -H "Cookie: <session-cookie>" \
-  -d '{"code": "TA-PE-1M-A1B2C3", "book_id": "uuid"}'
+# Submit a purchase request
+curl -X POST "$SB/rest/v1/rpc/request_purchase" \
+  -H "apikey: $KEY" -H "Content-Type: application/json" \
+  -d '{"p_plan":"Starter","p_amount":199,"p_email":"buyer@example.com","p_name":"A Buyer","p_phone":"+919999999999"}'
 
-# Save reading progress (authenticated)
-curl -X POST https://teamalum-bookstore.vercel.app/api/progress/save \
-  -H "Content-Type: application/json" \
-  -H "Cookie: <session-cookie>" \
-  -d '{"chapter_id": "uuid", "book_id": "uuid", "progress": 50, "last_position": "scroll_50"}'
+# Read published preview rows (public)
+curl "$SB/rest/v1/chapters?select=chapter_number,title,is_free_preview,content&status=eq.published" \
+  -H "apikey: $KEY"
 ```
 
 ---
 
-## Error Codes
+## Client-side flows
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| UNAUTHORIZED | 401 | No valid session |
-| FORBIDDEN | 403 | Insufficient permissions |
-| LICENSE_REQUIRED | 403 | Premium content requires license |
-| INVALID_CODE | 400 | Redeem code is invalid or used |
-| CODE_EXPIRED | 400 | Redeem code has expired |
-| NOT_FOUND | 404 | Resource not found |
-| VALIDATION_ERROR | 422 | Request data validation failed |
-| RATE_LIMITED | 429 | Too many requests |
-| INTERNAL_ERROR | 500 | Unexpected server error |
+### Redemption (`index.html`)
+
+```
+1. Buyer pastes a code  →  format check  /^TA-PE-([A-Z0-9]{2,4})-[A-Z0-9]{6}$/
+2. redeem_code(code, deviceId, deviceLabel)
+3. On success: save {code, plan, expires_at} in localStorage
+4. On every page load and every reader open: re-validate with the server
+   (localStorage is never trusted on its own)
+```
+
+### Purchase (`index.html`)
+
+```
+1. Buyer picks a plan → modal asks for email (required), name and phone
+2. confirmWhatsApp() opens wa.me with the buyer's details pre-filled
+3. request_purchase(plan, amount, email, name, phone) records the request
+4. The admin issues the code from /admin → Purchase Requests
+```
+
+### Admin (`admin-subscriptions.html`)
+
+The panel uses the anon key but with an admin session (Google sign-in as
+`teamalumorg@gmail.com`). Every read and write is authorised by `is_admin()` in RLS —
+the browser cannot elevate itself.
+
+| Action | Call |
+|--------|------|
+| List subscriptions | `from('subscriptions').select('*')` |
+| Issue a code | `from('subscriptions').update({code, status:'active', expires_at, payment_verified:true}).eq('id', …)` |
+| Generate a code | `from('subscriptions').insert({...})` |
+| Revoke | `from('subscriptions').update({status:'revoked'})` |
+| Unbind a device | `from('device_activations').delete().eq('id', …)` |
+| Save a chapter | `from('chapters').update(...)` / `.insert(...)` |

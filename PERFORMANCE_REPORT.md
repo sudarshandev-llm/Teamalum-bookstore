@@ -1,5 +1,10 @@
 # Performance Report
 
+> **⚠️ Superseded.** This report describes a Next.js 16 + TypeScript + Tailwind
+> application. The Team Alum Bookstore is actually a **static vanilla HTML/CSS/JS
+> site** with no build step and no framework. See [README.md](./README.md) for the
+> real architecture. Kept for historical reference.
+
 ## Build Optimization
 
 ### Current Configuration

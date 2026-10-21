@@ -9,29 +9,25 @@
       "destination": "/auth/callback.html"
     },
     {
+      "source": "/admin.team.html",
+      "destination": "/admin-subscriptions.html"
+    },
+    {
+      "source": "/admin.team",
+      "destination": "/admin-subscriptions.html"
+    },
+    {
       "source": "/admin",
       "destination": "/admin-subscriptions.html"
     },
     {
-      "source": "/admin.team.html(.*)",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/admin.team(.*)",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/admin(.*)",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/admin/(.*)",
+      "destination": "/admin-subscriptions.html"
     }
   ],
   "headers": [
     {
-      "source": "/(.+\\.png|.+\\.jpg|.+\\.jpeg|.+\\.svg|.+\\.ico)",
+      "source": "/(.+\\.png|.+\\.jpg|.+\\.jpeg|.+\\.svg|.+\\.ico|.+\\.webmanifest)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },

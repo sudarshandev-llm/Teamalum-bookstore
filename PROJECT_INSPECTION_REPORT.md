@@ -1,5 +1,11 @@
 # Project Inspection Report
 
+> **⚠️ Superseded.** This report describes a Next.js 16 + TypeScript + Tailwind
+> application with App Router route groups. The Team Alum Bookstore is actually a
+> **static vanilla HTML/CSS/JS site** with no build step, no router framework and no
+> API routes. See [README.md](./README.md) and
+> [PROJECT_STATUS.md](./PROJECT_STATUS.md) for the real architecture.
+
 ## Repository
 - URL: https://github.com/sudarshandev-llm/Teamalum-bookstore
 - Stack: Next.js 16, TypeScript, Tailwind CSS v4, Supabase

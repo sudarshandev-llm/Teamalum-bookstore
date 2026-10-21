@@ -1,5 +1,11 @@
 # Final Deployment Report
 
+> **⚠️ Superseded.** This report describes a Next.js 16 + TypeScript + Tailwind
+> deployment with 12 API routes. The Team Alum Bookstore is actually a **static
+> vanilla HTML/CSS/JS site** with no build step and no API layer — the "API" is
+> Supabase PostgREST + RPC. See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) and
+> [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for the real setup.
+
 ## Project Overview
 
 - **Project Name:** Teamalum Bookstore

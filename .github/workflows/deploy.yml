@@ -3,6 +3,11 @@ name: Deploy to Vercel
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -10,19 +15,52 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check required secrets
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::The VERCEL_TOKEN secret is missing. Add it under Settings > Secrets and variables > Actions > Repository secrets."
+            exit 1
+          fi
+
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
+
+      # The .vercel/ folder is gitignored, so the CLI cannot discover which
+      # project to deploy to. These two ids come from .vercel/repo.json.
+      - name: Link to the Vercel project
+        env:
+          VERCEL_ORG_ID: team_RiqZ3IUO0YDro6TZXnXKgqpR
+          VERCEL_PROJECT_ID: prj_upHclPgbf4DEdYKoesMFK1VkE2WD
+        run: |
+          echo "::add-mask::${{ secrets.VERCEL_TOKEN }}"
+          mkdir -p .vercel
+          cat > .vercel/project.json <<EOF
+          {
+            "projectId": "${{ env.VERCEL_PROJECT_ID }}",
+            "orgId": "${{ env.VERCEL_ORG_ID }}"
+          }
+          EOF
+          cat .vercel/project.json
 
       - name: Deploy to Vercel
         id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_RiqZ3IUO0YDro6TZXnXKgqpR
+          VERCEL_PROJECT_ID: prj_upHclPgbf4DEdYKoesMFK1VkE2WD
         run: |
-          if [ -z "$VERCEL_TOKEN" ]; then
-            echo "::error::VERCEL_TOKEN secret is not set. Please add it in GitHub repo Settings > Secrets."
-            exit 1
-          fi
-          vercel --prod --yes --token=$VERCEL_TOKEN
+          vercel --prod --yes --token="$VERCEL_TOKEN"
 
       - name: Summary
-        run: echo "Deployment completed — check https://teamalum-bookstore.vercel.app" >> $GITHUB_STEP_SUMMARY
+        if: always()
+        run: |
+          {
+            echo "### Vercel deployment"
+            echo ""
+            echo "- Commit: \`${{ github.sha }}\`"
+            echo "- Branch: \`${{ github.ref_name }}\`"
+            echo "- Status: ${{ job.status }}"
+            echo "- Site: https://teamalum-bookstore.vercel.app"
+          } >> $GITHUB_STEP_SUMMARY
