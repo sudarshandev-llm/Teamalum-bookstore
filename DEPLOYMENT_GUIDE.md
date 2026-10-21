@@ -59,7 +59,13 @@ that `chapters` accepts two rows for the same `chapter_number` (one with
 
 ### Option A — GitHub Actions (automatic)
 
-Pushes to `main` trigger `.github/workflows/deploy.yml`, which runs the Vercel CLI.
+Pushes to `main` trigger `.github/workflows/deploy.yml`, which:
+
+1. checks that `VERCEL_TOKEN` exists (fails fast with a clear message if not),
+2. runs `npm run check` — inline-script syntax, element-id cross-check, JSON validation,
+3. writes a minimal `.vercel/project.json` from `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`
+   (the `.vercel/` folder is gitignored, so the CLI cannot discover the project on its own),
+4. runs `vercel --prod --yes --token="$VERCEL_TOKEN"`.
 
 **Required repository secret:**
 
@@ -69,16 +75,21 @@ Pushes to `main` trigger `.github/workflows/deploy.yml`, which runs the Vercel C
 
 Add it under **Settings → Secrets and variables → Actions → Repository secrets**.
 
-The workflow also passes `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` so the CLI can find the
-project even though the `.vercel/` folder is gitignored:
+```bash
+# from a machine with the gh CLI logged in
+gh secret set VERCEL_TOKEN --repo sudarshandev-llm/Teamalum-bookstore
+```
+
+The project ids baked into the workflow:
 
 ```
 VERCEL_ORG_ID:     team_RiqZ3IUO0YDro6TZXnXKgqpR
 VERCEL_PROJECT_ID: prj_upHclPgbf4DEdYKoesMFK1VkE2WD
 ```
 
-If the token is missing the workflow fails immediately with an explicit message instead
-of a confusing CLI error.
+> **Vercel's own Git integration also deploys every push to `main`.** That is the
+> primary path and it has been shipping all changes. The GitHub Actions workflow is a
+> redundant, independently-auditable backup.
 
 ### Option B — Vercel dashboard (manual)
 
@@ -142,14 +153,26 @@ files).
 
 ### The workflow fails at "Deploy to Vercel"
 
-Almost always a missing `VERCEL_TOKEN` secret. The workflow now checks for it in a
-separate step first, so the error message names the problem directly.
+Almost always a missing or expired `VERCEL_TOKEN` secret. The workflow now checks for
+it in a separate step first, so the error message names the problem directly.
 
 If the token is set and it still fails, run the same command locally:
 
 ```bash
 vercel --prod --yes --token=$VERCEL_TOKEN
 ```
+
+### The workflow fails at "Verify"
+
+`npm run check` failed — either an inline script has a syntax error, a script
+references an element id that does not exist, or a JSON file is malformed. The output
+names the exact problem.
+
+### The deployment succeeds but the site shows the old version
+
+Vercel caches aggressively. `vercel.json` already sends
+`Cache-Control: no-cache, no-store, must-revalidate` for HTML. Hard-reload
+(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>) or check a deployment URL directly.
 
 ### "The specified project does not exist"
 

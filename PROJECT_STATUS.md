@@ -16,7 +16,7 @@ database — that needs a human with dashboard access.
 | Redemption → entitlement → content pipeline | ✅ Code complete, ⏳ needs migration applied |
 | Purchase request → issue code flow | ✅ Code complete, ⏳ needs migration applied |
 | Book content in the database | ⬜ **Empty — no chapters published** |
-| CI/CD deploy | ✅ Fixed, ⏳ needs `VERCEL_TOKEN` secret |
+| CI/CD deploy | ✅ Fixed and verified green |
 | Docs | ✅ Rewritten to match reality |
 
 ---
@@ -99,14 +99,38 @@ Until it is applied:
   which only returns the preview rows.
 - `subscriptions.user_id` and `subscriptions.book_slug` do not exist yet.
 
-### 2. Add the `VERCEL_TOKEN` secret — **required for CI**
+### 2. Add the `VERCEL_TOKEN` secret — ✅ **done**
 
 Repository secret: **Settings → Secrets and variables → Actions → Repository secrets**.
 
-Every one of the 21 workflow runs so far failed at the "Deploy to Vercel" step. The
-workflow now fails fast with an explicit message if the token is missing, and passes
-`VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` so the CLI can find the project even though
-`.vercel/` is gitignored.
+Every one of the 21 workflow runs before 22 October 2026 failed at the "Deploy to
+Vercel" step because the secret was missing. The workflow now fails fast with an
+explicit message if the token is absent, and passes `VERCEL_ORG_ID` /
+`VERCEL_PROJECT_ID` so the CLI can find the project even though `.vercel/` is
+gitignored.
+
+The secret is now set and the workflow has been verified **green end-to-end**
+(checkout → verify → link → deploy → summary), producing a `Ready` production
+deployment.
+
+> **Heads-up:** the token currently stored is a *session* token from the local
+> `vercel login`. It works, but it expires. To make CI permanent, create a dedicated
+> token at **vercel.com → Account Settings → Tokens → Create** (give it access to the
+> `team-alum-88e68813` team), then replace the secret:
+>
+> ```bash
+> gh secret set VERCEL_TOKEN --repo sudarshandev-llm/Teamalum-bookstore
+> ```
+>
+> The site does not depend on this: Vercel's own Git integration auto-deploys every
+> push to `main`, and that is what has been shipping the changes all along. The
+> workflow is a redundant, independently-auditable path.
+
+### 2b. CI now verifies before deploying
+
+The workflow runs `npm run check` (inline-script syntax, element-id cross-check, JSON
+validation) before deploying, so a broken script or a dangling element id fails the
+build instead of shipping.
 
 ### 3. Publish the book content — **required for the reader to show anything**
 
@@ -151,7 +175,7 @@ npm run db:build       # regenerate supabase/APPLY_NOW.sql
 ## Roadmap
 
 - [ ] Apply `supabase/APPLY_NOW.sql` to the live project
-- [ ] Add `VERCEL_TOKEN` repository secret
+- [x] Add `VERCEL_TOKEN` repository secret (add a durable dashboard token)
 - [ ] Publish chapters 1+ through `/admin` → Content
 - [ ] Migrate the free Chapter 1 preview from `index.html` into the database
 - [ ] Add server-side email delivery for issued codes

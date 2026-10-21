@@ -239,13 +239,22 @@ Every statement is idempotent, so it is safe to run more than once.
 
 ## Deployment
 
-Pushes to `main` trigger `.github/workflows/deploy.yml`, which runs the Vercel CLI with
-the project ids from `.vercel/repo.json` (the `.vercel` folder is gitignored, so the ids
-are passed as `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` environment variables).
+Pushes to `main` trigger `.github/workflows/deploy.yml`, which checks the token, runs
+`npm run check`, links the Vercel project using the ids from `.vercel/repo.json` (the
+`.vercel` folder is gitignored, so they are passed as `VERCEL_ORG_ID` /
+`VERCEL_PROJECT_ID` environment variables), and runs `vercel --prod`.
 
 **Required repository secret:** `VERCEL_TOKEN`.
-Set it under *Settings → Secrets and variables → Actions → Repository secrets*.
+Set it under *Settings → Secrets and variables → Actions → Repository secrets*:
+
+```bash
+gh secret set VERCEL_TOKEN --repo sudarshandev-llm/Teamalum-bookstore
+```
+
 Without it the workflow fails immediately with a clear message.
+
+> Vercel's own Git integration also auto-deploys every push to `main` — that is the
+> primary path. The GitHub Actions workflow is a redundant, auditable backup.
 
 Manual deploys still work:
 

@@ -13,7 +13,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check required secrets
         env:
@@ -23,6 +23,11 @@ jobs:
             echo "::error::The VERCEL_TOKEN secret is missing. Add it under Settings > Secrets and variables > Actions > Repository secrets."
             exit 1
           fi
+
+      # Syntax-check every inline script, verify that every element id the
+      # scripts reference exists, and validate the JSON config files.
+      - name: Verify
+        run: npm run check
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest

@@ -36,6 +36,14 @@ This release fixes the core bug: **a redeemed code did not unlock the book.**
   redirect loop. It now serves `admin-subscriptions.html`.
 - **The SPA catch-all rewrite** sent every unknown path to `index.html`, so typos
   silently loaded the homepage. Removed — unknown paths now return `404.html`.
+- **The CI deploy has never worked** — all 21 workflow runs failed because
+  `VERCEL_TOKEN` was missing and the CLI could not find the project (`.vercel/` is
+  gitignored). The workflow now fails fast with a clear message, passes
+  `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID`, and has been verified **green end-to-end**
+  producing a `Ready` production deployment.
+- **The Vercel project was configured with the `nextjs` framework preset** even though
+  this is a static site. `vercel.json` already sets `"framework": null`, which wins —
+  but the mismatch made the project settings misleading.
 
 ### Added
 
@@ -65,6 +73,8 @@ This release fixes the core bug: **a redeemed code did not unlock the book.**
 - **`scripts/build-apply-sql.js`** — bundles every migration into one pasteable
   `supabase/APPLY_NOW.sql`.
 - **npm scripts:** `check`, `check:scripts`, `check:ids`, `db:build`, `verify:json`.
+- **CI runs `npm run check` before deploying**, so a broken script or a dangling
+  element id fails the build instead of shipping.
 - **Unified admin read policies.** Every table the panel reads now has an email-based
   `is_admin()` SELECT policy, so the panel no longer depends on a correctly seeded
   `profiles.role` row.
