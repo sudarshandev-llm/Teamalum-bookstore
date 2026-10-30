@@ -283,9 +283,9 @@ vercel --prod --token=<VERCEL_TOKEN>
 
 ## Contact
 
-- Support email: socialsudarshan8@gmail.com
-- WhatsApp: 917775990933
-- Admin email: teamalumorg@gmail.com
+- Support email: teamalumorg@gmail.com
+- Official platform: https://team-alum.vercel.app
+- Inquiries: teamalumorg@gmail.com
 
 ## License
 
